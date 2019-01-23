@@ -1,4 +1,4 @@
-package com.example;
+package com.example.hashtable;
 
 public class HashTable {
     private int size = 0;
@@ -17,7 +17,6 @@ public class HashTable {
 
     /**
      * Construct hash table of fixed capacity
-     * @param capacity
      */
     private HashTable(int capacity) {
         this.capacity = capacity;
@@ -37,8 +36,6 @@ public class HashTable {
 
     /**
      * Calculate non negative (a mod b)
-     * @param a
-     * @param b
      * @return (a % b) >= 0
      */
     private int mod(int a, int b) {
@@ -46,43 +43,46 @@ public class HashTable {
     }
 
     /**
-     * Find a basket for an element
-     * @param key
+     * Find a basket for an element with key
+     * @throws IllegalArgumentException if key is null
      * @return number from 0 to (capacity - 1)
      */
-    private int getHash(String key) {
+    private int getHash(String key) throws IllegalArgumentException {
+        if (key == null) {
+            throw new IllegalArgumentException("Key should not be null.");
+        }
         return mod(key.hashCode(), capacity);
     }
 
     /**
      * Check if element with such key is included in hash table
-     * @param key
+     * @throws IllegalArgumentException if key is null
      * @return true iff hash table includes element with such key
      */
-    public boolean contains(String key) {
+    public boolean contains(String key) throws IllegalArgumentException {
         return baskets[getHash(key)].find(key) != null;
     }
 
     /**
      * Find element by key
-     * @param key
+     * @throws IllegalArgumentException if key is null
      * @return element with such key
      */
-    private Elem getElem(String key) {
+    private Element getElement(String key) throws IllegalArgumentException {
         return baskets[getHash(key)].find(key);
     }
 
     /**
      * Find value of element by key
-     * @param key
+     * @throws IllegalArgumentException if key is null
      * @return value of element with such key
      */
-    public String get(String key) {
-        Elem e = getElem(key);
-        if (e == null) {
+    public String get(String key) throws IllegalArgumentException {
+        Element element = getElement(key);
+        if (element == null) {
             return null;
         }
-        return e.getValue();
+        return element.getValue();
     }
 
     /**
@@ -93,58 +93,65 @@ public class HashTable {
             return;
         }
         capacity *= 2;
-        HashTable h = new HashTable(capacity);
-        for (List l : baskets) {
-            for (Elem elem : l.toArray()) {
-                h.put(elem.getKey(), elem.getValue());
+        var newHashTable = new HashTable(capacity);
+        for (List list : baskets) {
+            for (Element element : list.toArray()) {
+                newHashTable.put(element.getKey(), element.getValue());
             }
         }
-        baskets = h.baskets;
+        baskets = newHashTable.baskets;
     }
 
     /**
      * Add an element to a hash table. If such a key has already been in a hash table, then value changes.
      * @param key key to add
      * @param value value to add
+     * @throws IllegalArgumentException if key or value is null
      * @return previous value if such key has already been in a hash table or null if not
      */
-    public String put(String key, String value) {
-        Elem e = getElem(key);
-        if (e != null) {
-            String val = e.getValue();
-            e.setValue(value);
-            return val;
+    public String put(String key, String value) throws IllegalArgumentException {
+        if (key == null) {
+            throw new IllegalArgumentException("Key should not be null.");
+        }
+        if (value == null) {
+            throw new IllegalArgumentException("Value should not be null.");
+        }
+        Element element = getElement(key);
+        if (element != null) {
+            String prevValue = element.getValue();
+            element.setValue(value);
+            return prevValue;
         }
 
         checkSize();
         ++size;
-        Elem elem = new Elem(key, value);
-        baskets[getHash(key)].insert(elem);
+        var newElement = new Element(key, value);
+        baskets[getHash(key)].insert(newElement);
         return null;
     }
 
     /**
      * Delete an element by key
-     * @param key
+     * @throws IllegalArgumentException if key is null
      * @return previous value if such key was in a hash table, null otherwise
      */
-    public String remove(String key) {
-        Elem e = getElem(key);
-        if (e == null) {
+    public String remove(String key) throws IllegalArgumentException {
+        Element element = getElement(key);
+        if (element == null) {
             return null;
         }
         --size;
         baskets[getHash(key)].remove(key);
-        return e.getValue();
+        return element.getValue();
     }
 
     /**
      * Clear hash table, remove all elements
      */
     public void clear() {
-        size = 0;
-        for (int i = 0; i < capacity; i++) {
-            baskets[i].clear();
-        }
+        var newHashTable = new HashTable();
+        baskets = newHashTable.baskets;
+        capacity = newHashTable.capacity;
+        size = newHashTable.size;
     }
 }

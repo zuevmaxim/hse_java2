@@ -1,17 +1,26 @@
-package com.example;
+package com.example.hashtable;
 
+
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * List that contains elements
+ */
 public class List {
     private Node head;
     private int size;
 
+    /**
+     * List node that contains one element
+     */
     private class Node {
-        public Node next;
-        public Node prev;
-        public Elem elem;
-        public Node(Node nxt, Node prv, Elem elm) {
-            next = nxt;
-            prev = prv;
-            elem = elm;
+        private Node next;
+        private Node prev;
+        private Element element;
+        private Node(Node next, Node prev, Element element) {
+            this.next = next;
+            this.prev = prev;
+            this.element = element;
         }
     }
 
@@ -37,12 +46,12 @@ public class List {
      * @return node containing element
      */
     private Node findNode(String key) {
-        Node cur = head;
-        while (cur != null) {
-            if (cur.elem.getKey().equals(key)) {
-                return cur;
+        Node currentNode = head;
+        while (currentNode != null) {
+            if (currentNode.element.getKey().equals(key)) {
+                return currentNode;
             }
-            cur = cur.next;
+            currentNode = currentNode.next;
         }
         return null;
     }
@@ -52,21 +61,21 @@ public class List {
      * @param key which element should be found
      * @return element which key equals given parameter
      */
-    public Elem find(String key) {
+    public Element find(String key) {
         Node node = findNode(key);
         if (node == null) {
             return null;
         }
-        return node.elem;
+        return node.element;
     }
 
     /**
      * Insert new element to the head of the list
-     * @param elem which element should be inserted
+     * @param element which element should be inserted
      */
-    public void insert(Elem elem) {
+    public void insert(Element element) {
         ++size;
-        Node newNode = new Node(head, null, elem);
+        var newNode = new Node(head, null, element);
         if (head != null) {
             head.prev = newNode;
         }
@@ -112,14 +121,15 @@ public class List {
      * Transform list to array
      * @return array which contains list elements
      */
-    public Elem[] toArray() {
-        Elem[] a = new Elem[size];
-        Node cur = head;
+    public Element[] toArray() {
+        var array = new Element[size];
+        Node currentNode = head;
         int i = 0;
-        while (cur != null) {
-            a[i++] = cur.elem;
-            cur = cur.next;
+        while (currentNode != null) {
+            array[i] = currentNode.element;
+            currentNode = currentNode.next;
+            i++;
         }
-        return a;
+        return array;
     }
 }
