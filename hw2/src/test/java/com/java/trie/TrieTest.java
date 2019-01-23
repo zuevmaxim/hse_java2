@@ -158,4 +158,12 @@ class TrieTest {
         assertEquals(1, trie.size());
         assertTrue(trie.contains("one"));
     }
+
+    @Test
+    void removeEmptyString() {
+        trie.add("");
+        trie.remove("");
+        assertEquals(0, trie.size());
+        assertFalse(trie.contains(""));
+    }
 }
