@@ -69,4 +69,40 @@ class TrieTest {
         assertFalse(trie.contains("hel"));
         assertFalse(trie.contains("hell"));
     }
+
+    @Test
+    void sizeEmpty() {
+        assertEquals(0, trie.size());
+    }
+
+    @Test
+    void sizeOneString() {
+        trie.add("one");
+        assertEquals(1, trie.size());
+    }
+
+    @Test
+    void sizeManyStrings() {
+        trie.add("one");
+        trie.add("two");
+        trie.add("three");
+        assertEquals(3, trie.size());
+    }
+
+    @Test
+    void sizeSimilarStrings() {
+        trie.add("one");
+        trie.add("one");
+        trie.add("one");
+        assertEquals(1, trie.size());
+    }
+
+    @Test
+    void sizeSuffixStrings() {
+        trie.add("");
+        trie.add("o");
+        trie.add("on");
+        trie.add("one");
+        assertEquals(4, trie.size());
+    }
 }

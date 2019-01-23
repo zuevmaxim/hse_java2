@@ -49,6 +49,9 @@ public class Trie {
             currentVertex = currentVertex.getNext(c);
         }
         boolean result = !currentVertex.isTerminal();
+        if (result) {
+            size++;
+        }
         currentVertex.markTerminal();
         return result;
     }
@@ -65,5 +68,9 @@ public class Trie {
             currentVertex = currentVertex.getNext(c);
         }
         return currentVertex.isTerminal();
+    }
+
+    public int size() {
+        return size;
     }
 }
