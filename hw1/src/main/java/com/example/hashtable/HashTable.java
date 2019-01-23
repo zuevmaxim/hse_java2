@@ -1,5 +1,8 @@
 package com.example.hashtable;
 
+/**
+ * Hash table, which maps String to String
+ */
 public class HashTable {
     private int size = 0;
     private int capacity = 37;

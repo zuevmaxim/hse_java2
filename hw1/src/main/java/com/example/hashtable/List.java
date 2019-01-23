@@ -1,8 +1,5 @@
 package com.example.hashtable;
 
-
-import org.jetbrains.annotations.Nullable;
-
 /**
  * List that contains elements
  */

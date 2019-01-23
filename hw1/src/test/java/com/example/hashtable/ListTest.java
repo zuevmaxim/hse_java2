@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ListTest {
-    private List l;
+    private List list;
     private Element[] elements = new Element[4];
 
     @BeforeEach
     void init() {
-        l = new List();
+        list = new List();
         elements[0] = new Element("123", "bar");
         elements[1] = new Element("qwe", "foo");
         elements[2] = new Element("Ann", "9456890");
@@ -19,104 +19,104 @@ class ListTest {
 
     @Test
     void findElementInEmptyList() {
-        assertNull(l.find("123"));
+        assertNull(list.find("123"));
     }
 
     @Test
     void findExistingElement() {
-        l.insert(elements[0]);
-        l.insert(elements[1]);
-        assertEquals(l.find("123"), elements[0]);
+        list.insert(elements[0]);
+        list.insert(elements[1]);
+        assertEquals(list.find("123"), elements[0]);
     }
 
     @Test
     void findNonExistingElement() {
-        l.insert(elements[0]);
-        l.insert(elements[1]);
-        assertNull(l.find("111"));
+        list.insert(elements[0]);
+        list.insert(elements[1]);
+        assertNull(list.find("111"));
     }
 
     @Test
     void emptyListSize() {
-        assertEquals(0, l.size());
+        assertEquals(0, list.size());
     }
 
     @Test
     void insertOneElement() {
-        l.insert(elements[3]);
-        assertNotNull(l.find("a"));
-        assertEquals(1, l.size());
+        list.insert(elements[3]);
+        assertNotNull(list.find("a"));
+        assertEquals(1, list.size());
     }
 
     @Test
     void insertElements() {
-        l.insert(elements[0]);
-        l.insert(elements[1]);
-        l.insert(elements[2]);
-        assertEquals(l.find("123"), elements[0]);
-        assertEquals(l.find("qwe"), elements[1]);
-        assertEquals(l.find("Ann"), elements[2]);
-        assertEquals(3, l.size());
+        list.insert(elements[0]);
+        list.insert(elements[1]);
+        list.insert(elements[2]);
+        assertEquals(list.find("123"), elements[0]);
+        assertEquals(list.find("qwe"), elements[1]);
+        assertEquals(list.find("Ann"), elements[2]);
+        assertEquals(3, list.size());
     }
 
     @Test
     void removeExistingElement() {
-        l.insert(elements[0]);
-        l.insert(elements[1]);
-        l.insert(elements[2]);
-        l.remove("qwe");
-        assertNull(l.find("qwe"));
-        assertEquals(2, l.size());
-        assertEquals(l.find("123"), elements[0]);
-        assertEquals(l.find("Ann"), elements[2]);
+        list.insert(elements[0]);
+        list.insert(elements[1]);
+        list.insert(elements[2]);
+        list.remove("qwe");
+        assertNull(list.find("qwe"));
+        assertEquals(2, list.size());
+        assertEquals(list.find("123"), elements[0]);
+        assertEquals(list.find("Ann"), elements[2]);
     }
 
     @Test
     void removeTailElement() {
-        l.insert(elements[0]);
-        l.insert(elements[1]);
-        l.insert(elements[2]);
-        l.remove("123");
-        assertNull(l.find("123"));
-        assertEquals(2, l.size());
-        assertEquals(l.find("qwe"), elements[1]);
-        assertEquals(l.find("Ann"), elements[2]);
+        list.insert(elements[0]);
+        list.insert(elements[1]);
+        list.insert(elements[2]);
+        list.remove("123");
+        assertNull(list.find("123"));
+        assertEquals(2, list.size());
+        assertEquals(list.find("qwe"), elements[1]);
+        assertEquals(list.find("Ann"), elements[2]);
     }
 
     @Test
     void removeHeadElement() {
-        l.insert(elements[0]);
-        l.insert(elements[1]);
-        l.insert(elements[2]);
-        l.remove("Ann");
-        assertNull(l.find("Ann"));
-        assertEquals(2, l.size());
-        assertEquals(l.find("qwe"), elements[1]);
-        assertEquals(l.find("123"), elements[0]);
+        list.insert(elements[0]);
+        list.insert(elements[1]);
+        list.insert(elements[2]);
+        list.remove("Ann");
+        assertNull(list.find("Ann"));
+        assertEquals(2, list.size());
+        assertEquals(list.find("qwe"), elements[1]);
+        assertEquals(list.find("123"), elements[0]);
     }
 
     @Test
     void removeNonExistingElement() {
-        l.insert(elements[0]);
-        l.insert(elements[1]);
-        l.insert(elements[2]);
-        l.remove("111");
-        assertEquals(3, l.size());
-        assertEquals(l.find("123"), elements[0]);
-        assertEquals(l.find("qwe"), elements[1]);
-        assertEquals(l.find("Ann"), elements[2]);
+        list.insert(elements[0]);
+        list.insert(elements[1]);
+        list.insert(elements[2]);
+        list.remove("111");
+        assertEquals(3, list.size());
+        assertEquals(list.find("123"), elements[0]);
+        assertEquals(list.find("qwe"), elements[1]);
+        assertEquals(list.find("Ann"), elements[2]);
     }
 
     @Test
     void clear() {
-        l.insert(elements[0]);
-        l.insert(elements[1]);
-        l.insert(elements[2]);
-        l.clear();
-        assertNull(l.find("123"));
-        assertNull(l.find("qwe"));
-        assertNull(l.find("Ann"));
-        assertEquals(0, l.size());
+        list.insert(elements[0]);
+        list.insert(elements[1]);
+        list.insert(elements[2]);
+        list.clear();
+        assertNull(list.find("123"));
+        assertNull(list.find("qwe"));
+        assertNull(list.find("Ann"));
+        assertEquals(0, list.size());
     }
 
 }
