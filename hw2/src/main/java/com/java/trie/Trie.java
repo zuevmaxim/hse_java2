@@ -6,10 +6,12 @@ public class Trie {
     private class Vertex {
         private HashMap<Character, Vertex> next;
         private boolean isTerminal;
+        private int subTrieSize;
 
         public Vertex() {
             next = new HashMap<>();
             isTerminal = false;
+            subTrieSize = 0;
         }
 
         public Vertex getNext(Character character) {
@@ -20,12 +22,28 @@ public class Trie {
             next.put(character, vertex);
         }
 
-        public void markTerminal() {
-            isTerminal = true;
+        public void deleteNext(Character character) {
+            next.remove(character);
+        }
+
+        public void setTerminal(boolean isTerminal) {
+            this.isTerminal = isTerminal;
         }
 
         public boolean isTerminal() {
             return isTerminal;
+        }
+
+        public void incSubTrieSize() {
+            subTrieSize++;
+        }
+
+        public void decSubTrieSize() {
+            subTrieSize--;
+        }
+
+        public int getSubTrieSize() {
+            return subTrieSize;
         }
     }
 
@@ -38,22 +56,21 @@ public class Trie {
     }
 
     public boolean add(String string) throws IllegalArgumentException{
-        if (string == null) {
-            throw new IllegalArgumentException("String should not be null.");
+        if (contains(string)) {
+            return false;
         }
+        size++;
         Vertex currentVertex = root;
         for (char c : string.toCharArray()) {
             if (currentVertex.getNext(c) == null) {
                 currentVertex.setNext(c, new Vertex());
             }
+            currentVertex.incSubTrieSize();
             currentVertex = currentVertex.getNext(c);
         }
-        boolean result = !currentVertex.isTerminal();
-        if (result) {
-            size++;
-        }
-        currentVertex.markTerminal();
-        return result;
+        currentVertex.incSubTrieSize();
+        currentVertex.setTerminal(true);
+        return true;
     }
 
     public boolean contains(String string) throws IllegalArgumentException {
@@ -72,5 +89,25 @@ public class Trie {
 
     public int size() {
         return size;
+    }
+
+    public boolean remove(String string) throws IllegalArgumentException{
+        if (!contains(string)) {
+            return false;
+        }
+        --size;
+        Vertex currentVertex = root;
+        for (char c : string.toCharArray()) {
+            if (currentVertex.getNext(c).getSubTrieSize() == 1) {
+                currentVertex.deleteNext(c);
+                currentVertex.decSubTrieSize();
+                return true;
+            }
+            currentVertex.decSubTrieSize();
+            currentVertex = currentVertex.getNext(c);
+        }
+        currentVertex.decSubTrieSize();
+        currentVertex.setTerminal(false);
+        return true;
     }
 }

@@ -34,7 +34,7 @@ class TrieTest {
     }
 
     @Test
-    void addSuffixStrings() {
+    void addPrefixStrings() {
         boolean result1 = trie.add("One");
         boolean result2 = trie.add("On");
         assertTrue(result1);
@@ -42,7 +42,7 @@ class TrieTest {
     }
 
     @Test
-    void addEmptyxStrings() {
+    void addEmptyStrings() {
         boolean result = trie.add("");
         assertTrue(result);
     }
@@ -82,6 +82,12 @@ class TrieTest {
     }
 
     @Test
+    void sizeEmptyString() {
+        trie.add("");
+        assertEquals(1, trie.size());
+    }
+
+    @Test
     void sizeManyStrings() {
         trie.add("one");
         trie.add("two");
@@ -98,11 +104,58 @@ class TrieTest {
     }
 
     @Test
-    void sizeSuffixStrings() {
+    void sizePrefixStrings() {
         trie.add("");
         trie.add("o");
         trie.add("on");
         trie.add("one");
         assertEquals(4, trie.size());
+    }
+
+    @Test
+    void removeEmpty() {
+        trie.remove("hello");
+        assertEquals(0, trie.size());
+    }
+
+    @Test
+    void removeNullString() {
+        assertThrows(IllegalArgumentException.class,
+                () -> trie.remove(null),
+                "String should not be null.");
+    }
+
+    @Test
+    void removeExistingString() {
+        trie.add("one");
+        trie.add("two");
+        trie.add("three");
+        trie.remove("two");
+        assertEquals(2, trie.size());
+        assertTrue(trie.contains("one"));
+        assertFalse(trie.contains("two"));
+        assertTrue(trie.contains("three"));
+    }
+
+    @Test
+    void removeNonExistingString() {
+        trie.add("one");
+        trie.add("two");
+        trie.add("three");
+        trie.remove("tw");
+        assertEquals(3, trie.size());
+        assertTrue(trie.contains("one"));
+        assertTrue(trie.contains("two"));
+        assertTrue(trie.contains("three"));
+    }
+
+    @Test
+    void removePrefixString() {
+        trie.add("one");
+        trie.remove("");
+        trie.remove("o");
+        trie.remove("on");
+        assertEquals(1, trie.size());
+        assertTrue(trie.contains("one"));
     }
 }
