@@ -5,17 +5,14 @@ package com.example.hashtable;
  */
 public class HashTable {
     private int size = 0;
-    private int capacity = 37;
+    private int capacity;
     private List[] baskets;
 
     /**
      * Construct empty hash table
      */
     public HashTable() {
-        baskets = new List[capacity];
-        for (int i = 0; i < capacity; i++) {
-            baskets[i] = new List();
-        }
+        this(37);
     }
 
     /**
