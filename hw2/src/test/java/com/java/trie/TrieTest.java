@@ -166,4 +166,37 @@ class TrieTest {
         assertEquals(0, trie.size());
         assertFalse(trie.contains(""));
     }
+
+    @Test
+    void howManyStartsWithPrefixNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> trie.howManyStartsWithPrefix(null),
+                "Prefix should not be null.");
+    }
+
+    @Test
+    void howManyStartsWithPrefixExistingString() {
+        trie.add("one");
+        trie.add("two");
+        trie.add("twotwo");
+        trie.add("three");
+        assertEquals(2, trie.howManyStartsWithPrefix("two"));
+    }
+
+    @Test
+    void howManyStartsWithPrefixExistingSuffix() {
+        trie.add("one");
+        trie.add("two");
+        trie.add("three");
+        assertEquals(2, trie.howManyStartsWithPrefix("t"));
+    }
+
+    @Test
+    void howManyStartsWithPrefixNonExistingSuffix() {
+        trie.add("one");
+        trie.add("two");
+        trie.add("three");
+        assertEquals(0, trie.howManyStartsWithPrefix("four"));
+    }
+
 }

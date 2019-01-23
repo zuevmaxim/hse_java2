@@ -164,4 +164,22 @@ public class Trie {
         currentVertex.setTerminal(false);
         return true;
     }
+
+    /**
+     * How many strings in the trie starts with such prefix
+     * @throws IllegalArgumentException if prefix is null
+     */
+    public int howManyStartsWithPrefix(String prefix) throws IllegalArgumentException {
+        if (prefix == null) {
+            throw new IllegalArgumentException("Prefix should not be null.");
+        }
+        Vertex currentVertex = root;
+        for (char c : prefix.toCharArray()) {
+            if (currentVertex.getNext(c) == null){
+                return 0;
+            }
+            currentVertex = currentVertex.getNext(c);
+        }
+        return currentVertex.getSubTrieSize();
+    }
 }
