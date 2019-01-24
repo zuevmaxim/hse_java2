@@ -1,11 +1,16 @@
 package com.java.trie;
 
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Trie stores a dynamic set of strings
  */
-public class Trie {
+public class Trie implements Serializable {
     /**
      * Vertex of tree of possible suffixes of string
      */
@@ -53,6 +58,9 @@ public class Trie {
             this.isTerminal = isTerminal;
         }
 
+        /**
+         * Check if vertex is terminal
+         */
         public boolean isTerminal() {
             return isTerminal;
         }
@@ -71,8 +79,19 @@ public class Trie {
             subTrieSize--;
         }
 
+        /**
+         * Initialize subTreeSize
+         */
+        private void setSubTrieSize(int subTrieSize) {
+            this.subTrieSize = subTrieSize;
+        }
+
         public int getSubTrieSize() {
             return subTrieSize;
+        }
+
+        private HashMap<Character, Vertex> getNexts() {
+            return next;
         }
     }
 
@@ -99,12 +118,12 @@ public class Trie {
         }
         size++;
         Vertex currentVertex = root;
-        for (char c : string.toCharArray()) {
-            if (currentVertex.getNext(c) == null) {
-                currentVertex.setNext(c, new Vertex());
+        for (char currentCharacter : string.toCharArray()) {
+            if (currentVertex.getNext(currentCharacter) == null) {
+                currentVertex.setNext(currentCharacter, new Vertex());
             }
             currentVertex.incSubTrieSize();
-            currentVertex = currentVertex.getNext(c);
+            currentVertex = currentVertex.getNext(currentCharacter);
         }
         currentVertex.incSubTrieSize();
         currentVertex.setTerminal(true);
@@ -122,11 +141,11 @@ public class Trie {
             throw new IllegalArgumentException("String should not be null.");
         }
         Vertex currentVertex = root;
-        for (char c : string.toCharArray()) {
-            if (currentVertex.getNext(c) == null) {
+        for (char currentCharacter : string.toCharArray()) {
+            if (currentVertex.getNext(currentCharacter) == null) {
                 return false;
             }
-            currentVertex = currentVertex.getNext(c);
+            currentVertex = currentVertex.getNext(currentCharacter);
         }
         return currentVertex.isTerminal();
     }
@@ -151,14 +170,14 @@ public class Trie {
         }
         --size;
         Vertex currentVertex = root;
-        for (char c : string.toCharArray()) {
-            if (currentVertex.getNext(c).getSubTrieSize() == 1) {
-                currentVertex.deleteNext(c);
+        for (char currentCharacter : string.toCharArray()) {
+            if (currentVertex.getNext(currentCharacter).getSubTrieSize() == 1) {
+                currentVertex.deleteNext(currentCharacter);
                 currentVertex.decSubTrieSize();
                 return true;
             }
             currentVertex.decSubTrieSize();
-            currentVertex = currentVertex.getNext(c);
+            currentVertex = currentVertex.getNext(currentCharacter);
         }
         currentVertex.decSubTrieSize();
         currentVertex.setTerminal(false);
@@ -174,12 +193,143 @@ public class Trie {
             throw new IllegalArgumentException("Prefix should not be null.");
         }
         Vertex currentVertex = root;
-        for (char c : prefix.toCharArray()) {
-            if (currentVertex.getNext(c) == null){
+        for (char currentCharacter : prefix.toCharArray()) {
+            if (currentVertex.getNext(currentCharacter) == null){
                 return 0;
             }
-            currentVertex = currentVertex.getNext(c);
+            currentVertex = currentVertex.getNext(currentCharacter);
         }
         return currentVertex.getSubTrieSize();
     }
+
+    /**
+     * Subclass for serializing and deserializing
+     */
+    private class TrieSerializer {
+        /**
+         * Full description of Vertex for (de)serializing
+         */
+        private class VertexId {
+            /**
+             * Parent's number in dfs path
+             */
+            int parentIndex;
+            char parentChar;
+            boolean isTerminal;
+
+            /**
+             * Construct VertexId
+             */
+            public VertexId(int parentIndex, char parentChar, boolean isTerminal) {
+                this.parentIndex = parentIndex;
+                this.parentChar = parentChar;
+                this.isTerminal = isTerminal;
+            }
+        }
+        private ArrayList<VertexId> vertexIds;
+
+        /**
+         * Construct serializer
+         */
+        public TrieSerializer() {
+            vertexIds = new ArrayList<>();
+        }
+
+        /**
+         * Serialize trie to the output stream in format:
+         * (int)N -- number of vertices, -1, 0, (int) if root is terminal,
+         * for each vertex 1..N-1 : (int)parent index, (int)parent char, (int) if vertex is terminal
+         * @param out output stream
+         * @throws IOException  if an I/O error occurs
+         */
+        public void serialize(OutputStream out) throws IOException {
+            vertexIds.add(new VertexId(-1, (char) 0, root.isTerminal()));
+            dfs(root, 0);
+            out.write(vertexIds.size());
+            for (VertexId vertexId : vertexIds) {
+                out.write(vertexId.parentIndex);
+                out.write((int)vertexId.parentChar);
+                out.write(vertexId.isTerminal ? 1 : 0);
+            }
+        }
+
+        /**
+         * Deserialize trie from the input stream
+         * @param in input stream
+         * @throws IOException if there no enough data or other I/O error occurs
+         */
+        public void deserialize(InputStream in) throws IOException {
+            int vertexNumber = in.read();
+            if (vertexNumber == -1) {
+                throw new EOFException("Unexpected end of input stream");
+            }
+            for (int i = 0; i < vertexNumber; i++) {
+                int parentIndex = in.read();
+                int parentChar = in.read();
+                int isTerminal = in.read();
+                if (isTerminal == -1) {
+                    throw new EOFException("Unexpected end of input stream");
+                }
+                vertexIds.add(new VertexId(parentIndex, (char)parentChar, isTerminal == 1));
+            }
+
+            var vertices = new Vertex[vertexNumber];
+            for (int i = 0; i < vertexNumber; i++) {
+                vertices[i] = new Vertex();
+            }
+
+            vertices[0].setTerminal(vertexIds.get(0).isTerminal);
+
+            size = 0;
+            for (int i = 1; i < vertexNumber; i++) {
+                var vertexId = vertexIds.get(i);
+                vertices[vertexId.parentIndex].setNext(vertexId.parentChar, vertices[i]);
+                vertices[i].setTerminal(vertexId.isTerminal);
+                if (vertexId.isTerminal) {
+                    size++;
+                }
+            }
+
+            root = vertices[0];
+            calculateSubTreeSizes(root);
+        }
+
+        /**
+         * Recursively calculate the number of terminal vertices in a subtree of every vertex in the trie
+         */
+        private void calculateSubTreeSizes(Vertex vertex) {
+            int vertexSubTreeSize = vertex.isTerminal() ? 1 : 0;
+            for (var entry : vertex.next.entrySet()){
+                calculateSubTreeSizes(entry.getValue());
+                vertexSubTreeSize += entry.getValue().subTrieSize;
+            }
+            vertex.setSubTrieSize(vertexSubTreeSize);
+        }
+
+        /**
+         * Find a parent recursively for every vertex in the trie
+         * @param parent parent's index in vertexIds array
+         */
+        private void dfs(Vertex vertex, int parent) {
+            var vertices = vertex.getNexts().entrySet();
+            for (var entry : vertices) {
+                vertexIds.add(new VertexId(parent, entry.getKey(), entry.getValue().isTerminal()));
+                dfs(entry.getValue(), vertexIds.size() - 1);
+            }
+        }
+
+    }
+
+    @Override
+    public void serialize(OutputStream out) throws IOException {
+        var trieSerializer = new TrieSerializer();
+        trieSerializer.serialize(out);
+    }
+
+    @Override
+    public void deserialize(InputStream in) throws IOException {
+        var trieSerializer = new TrieSerializer();
+        trieSerializer.deserialize(in);
+    }
+
 }

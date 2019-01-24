@@ -2,6 +2,8 @@ package com.java.trie;
 
 import org.junit.jupiter.api.*;
 
+import java.io.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class TrieTest {
@@ -197,6 +199,42 @@ class TrieTest {
         trie.add("two");
         trie.add("three");
         assertEquals(0, trie.howManyStartsWithPrefix("four"));
+    }
+
+    @Test
+    void serializeEmpty() {
+        try (var os = new ByteArrayOutputStream()) {
+            trie.serialize(os);
+            try (var is = new ByteArrayInputStream(os.toByteArray())) {
+                trie = new Trie();
+                trie.deserialize(is);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assertEquals(0, trie.size());
+    }
+
+    @Test
+    void serialize() {
+        trie.add("one");
+        trie.add("two");
+        trie.add("three");
+        try (var os = new ByteArrayOutputStream()) {
+            trie.serialize(os);
+            try (var is = new ByteArrayInputStream(os.toByteArray())) {
+                trie = new Trie();
+                trie.deserialize(is);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assertEquals(3, trie.size());
+        assertTrue(trie.contains("one"));
+        assertTrue(trie.contains("two"));
+        assertTrue(trie.contains("three"));
+        assertEquals(2, trie.howManyStartsWithPrefix("t"));
+        assertEquals(1, trie.howManyStartsWithPrefix("tw"));
     }
 
 }
