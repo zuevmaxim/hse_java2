@@ -194,7 +194,7 @@ public class Trie implements Serializable {
         }
         Vertex currentVertex = root;
         for (char currentCharacter : prefix.toCharArray()) {
-            if (currentVertex.getNext(currentCharacter) == null){
+            if (currentVertex.getNext(currentCharacter) == null) {
                 return 0;
             }
             currentVertex = currentVertex.getNext(currentCharacter);
@@ -226,6 +226,7 @@ public class Trie implements Serializable {
                 this.isTerminal = isTerminal;
             }
         }
+
         private ArrayList<VertexId> vertexIds;
 
         /**
@@ -267,7 +268,7 @@ public class Trie implements Serializable {
                 int parentIndex = in.read();
                 int parentChar = in.read();
                 int isTerminal = in.read();
-                if (isTerminal == -1) {
+                if (parentIndex == -1 || parentChar == -1 || isTerminal == -1) {
                     throw new EOFException("Unexpected end of input stream");
                 }
                 vertexIds.add(new VertexId(parentIndex, (char)parentChar, isTerminal == 1));
