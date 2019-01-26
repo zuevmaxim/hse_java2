@@ -216,7 +216,7 @@ class TrieTest {
     }
 
     @Test
-    void serialize() throws IOException {
+    void serializeAndRestore() throws IOException {
         trie.add("one");
         trie.add("two");
         trie.add("three");
@@ -235,4 +235,32 @@ class TrieTest {
         assertEquals(1, trie.howManyStartsWithPrefix("tw"));
     }
 
+    @Test
+    void serializeAndCopy() throws IOException {
+        var newTrie = new Trie();
+        newTrie.add("one");
+        newTrie.add("two");
+        newTrie.add("three");
+        trie.add("tree");
+        trie.add("trie");
+        trie.add("three");
+        trie.add("think");
+        try (var os = new ByteArrayOutputStream()) {
+            trie.serialize(os);
+            trie = null;
+            try (var is = new ByteArrayInputStream(os.toByteArray())) {
+                newTrie.deserialize(is);
+            }
+        }
+        assertEquals(4, newTrie.size());
+        assertFalse(newTrie.contains("one"));
+        assertFalse(newTrie.contains("two"));
+        assertTrue(newTrie.contains("tree"));
+        assertTrue(newTrie.contains("trie"));
+        assertTrue(newTrie.contains("three"));
+        assertTrue(newTrie.contains("think"));
+        assertEquals(4, newTrie.howManyStartsWithPrefix("t"));
+        assertEquals(2, newTrie.howManyStartsWithPrefix("tr"));
+        assertEquals(2, newTrie.howManyStartsWithPrefix("th"));
+    }
 }
