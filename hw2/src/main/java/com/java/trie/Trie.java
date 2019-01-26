@@ -218,9 +218,9 @@ public class Trie implements Serializable {
             /**
              * Parent's number in dfs path
              */
-            int parentIndex;
-            char parentChar;
-            boolean isTerminal;
+            private int parentIndex;
+            private char parentChar;
+            private boolean isTerminal;
 
             /**
              * Construct VertexId
