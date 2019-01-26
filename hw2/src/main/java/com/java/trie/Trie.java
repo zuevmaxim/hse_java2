@@ -112,6 +112,9 @@ public class Trie implements Serializable {
      * @throws IllegalArgumentException if string is null
      */
     public boolean add(String string) throws IllegalArgumentException{
+        if (string == null) {
+            throw new IllegalArgumentException("String should not be null.");
+        }
         if (contains(string)) {
             return false;
         }
@@ -163,7 +166,10 @@ public class Trie implements Serializable {
      * @return true iff such string had been in the trie
      * @throws IllegalArgumentException if string is null
      */
-    public boolean remove(String string) throws IllegalArgumentException{
+    public boolean remove(String string) throws IllegalArgumentException {
+        if (string == null) {
+            throw new IllegalArgumentException("String should not be null.");
+        }
         if (!contains(string)) {
             return false;
         }
