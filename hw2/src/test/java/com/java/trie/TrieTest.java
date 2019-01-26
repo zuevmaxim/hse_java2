@@ -216,7 +216,7 @@ class TrieTest {
     }
 
     @Test
-    void serialize() {
+    void serialize() throws IOException {
         trie.add("one");
         trie.add("two");
         trie.add("three");
@@ -226,8 +226,6 @@ class TrieTest {
                 trie = new Trie();
                 trie.deserialize(is);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         assertEquals(3, trie.size());
         assertTrue(trie.contains("one"));
