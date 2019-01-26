@@ -1,9 +1,6 @@
 package com.java.trie;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -243,19 +240,21 @@ public class Trie implements Serializable {
 
         /**
          * Serialize trie to the output stream in format:
-         * (int)N -- number of vertices, -1, 0, (int) if root is terminal,
-         * for each vertex 1..N-1 : (int)parent index, (int)parent char, (int) if vertex is terminal
+         * (int)N -- number of vertices, 0, 0, (bool) if root is terminal,
+         * for each vertex 1..N-1 : (int)parent index, (char)parent char, (bool) if vertex is terminal
          * @param out output stream
          * @throws IOException  if an I/O error occurs
          */
         public void serialize(OutputStream out) throws IOException {
-            vertexIds.add(new VertexId(-1, (char) 0, root.isTerminal()));
-            dfs(root, 0);
-            out.write(vertexIds.size());
-            for (VertexId vertexId : vertexIds) {
-                out.write(vertexId.parentIndex);
-                out.write((int)vertexId.parentChar);
-                out.write(vertexId.isTerminal ? 1 : 0);
+            try (var dataOut = new DataOutputStream(out)) {
+                vertexIds.add(new VertexId(0, (char) 0, root.isTerminal()));
+                dfs(root, 0);
+                dataOut.writeInt(vertexIds.size());
+                for (VertexId vertexId : vertexIds) {
+                    dataOut.writeInt(vertexId.parentIndex);
+                    dataOut.writeChar(vertexId.parentChar);
+                    dataOut.writeBoolean(vertexId.isTerminal);
+                }
             }
         }
 
@@ -265,39 +264,37 @@ public class Trie implements Serializable {
          * @throws IOException if there no enough data or other I/O error occurs
          */
         public void deserialize(InputStream in) throws IOException {
-            int vertexNumber = in.read();
-            if (vertexNumber == -1) {
-                throw new EOFException("Unexpected end of input stream");
-            }
-            for (int i = 0; i < vertexNumber; i++) {
-                int parentIndex = in.read();
-                int parentChar = in.read();
-                int isTerminal = in.read();
-                if (parentIndex == -1 || parentChar == -1 || isTerminal == -1) {
-                    throw new EOFException("Unexpected end of input stream");
+            try (var dataIn = new DataInputStream(in)) {
+                int vertexNumber = dataIn.readInt();
+                for (int i = 0; i < vertexNumber; i++) {
+                    int parentIndex = dataIn.readInt();
+                    char parentChar = dataIn.readChar();
+                    boolean isTerminal = dataIn.readBoolean();
+                    vertexIds.add(new VertexId(parentIndex, parentChar, isTerminal));
                 }
-                vertexIds.add(new VertexId(parentIndex, (char)parentChar, isTerminal == 1));
-            }
 
-            var vertices = new Vertex[vertexNumber];
-            for (int i = 0; i < vertexNumber; i++) {
-                vertices[i] = new Vertex();
-            }
 
-            vertices[0].setTerminal(vertexIds.get(0).isTerminal);
-
-            size = 0;
-            for (int i = 1; i < vertexNumber; i++) {
-                var vertexId = vertexIds.get(i);
-                vertices[vertexId.parentIndex].setNext(vertexId.parentChar, vertices[i]);
-                vertices[i].setTerminal(vertexId.isTerminal);
-                if (vertexId.isTerminal) {
-                    size++;
+                var vertices = new Vertex[vertexNumber];
+                for (int i = 0; i < vertexNumber; i++) {
+                    vertices[i] = new Vertex();
                 }
-            }
 
-            root = vertices[0];
-            calculateSubTreeSizes(root);
+                vertices[0].setTerminal(vertexIds.get(0).isTerminal);
+                size = vertices[0].isTerminal ? 1 : 0;
+
+
+                for (int i = 1; i < vertexNumber; i++) {
+                    var vertexId = vertexIds.get(i);
+                    vertices[vertexId.parentIndex].setNext(vertexId.parentChar, vertices[i]);
+                    vertices[i].setTerminal(vertexId.isTerminal);
+                    if (vertexId.isTerminal) {
+                        size++;
+                    }
+                }
+
+                root = vertices[0];
+                calculateSubTreeSizes(root);
+            }
         }
 
         /**

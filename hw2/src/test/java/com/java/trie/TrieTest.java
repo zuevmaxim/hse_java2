@@ -202,17 +202,28 @@ class TrieTest {
     }
 
     @Test
-    void serializeEmpty() {
+    void serializeEmpty() throws IOException {
         try (var os = new ByteArrayOutputStream()) {
             trie.serialize(os);
             try (var is = new ByteArrayInputStream(os.toByteArray())) {
                 trie = new Trie();
                 trie.deserialize(is);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         assertEquals(0, trie.size());
+    }
+
+    @Test
+    void serializeEmptyString() throws IOException {
+        trie.add("");
+        try (var os = new ByteArrayOutputStream()) {
+            trie.serialize(os);
+            try (var is = new ByteArrayInputStream(os.toByteArray())) {
+                trie = new Trie();
+                trie.deserialize(is);
+            }
+        }
+        assertEquals(1, trie.size());
     }
 
     @Test
@@ -262,5 +273,33 @@ class TrieTest {
         assertEquals(4, newTrie.howManyStartsWithPrefix("t"));
         assertEquals(2, newTrie.howManyStartsWithPrefix("tr"));
         assertEquals(2, newTrie.howManyStartsWithPrefix("th"));
+    }
+
+    @Test
+    void serializeBigTrie() throws IOException {
+        var stringBuilder = new StringBuilder();
+        final int N = 1000;
+        for (int i = 0; i < N; i++) {
+            trie.add(stringBuilder.toString());
+            stringBuilder.append('a');
+        }
+        try (var os = new ByteArrayOutputStream()) {
+            trie.serialize(os);
+            trie = new Trie();
+            try (var is = new ByteArrayInputStream(os.toByteArray())) {
+                trie.deserialize(is);
+            }
+        }
+        assertEquals(N, trie.size());
+    }
+
+    @Test
+    void serializeThrowException() throws IOException {
+        try (var os = new ByteArrayOutputStream()) {
+            try (var is = new ByteArrayInputStream(os.toByteArray())) {
+                assertThrows(EOFException.class, () -> trie.deserialize(is));
+            }
+        }
+
     }
 }
