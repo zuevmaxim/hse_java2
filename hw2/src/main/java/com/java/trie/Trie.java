@@ -4,8 +4,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Trie stores a dynamic set of strings
@@ -90,8 +89,8 @@ public class Trie implements Serializable {
             return subTrieSize;
         }
 
-        private HashMap<Character, Vertex> getNexts() {
-            return next;
+        private Set<Map.Entry<Character, Vertex>> getNexts() {
+            return next.entrySet();
         }
     }
 
@@ -312,7 +311,7 @@ public class Trie implements Serializable {
          * @param parent parent's index in vertexIds array
          */
         private void dfs(Vertex vertex, int parent) {
-            var vertices = vertex.getNexts().entrySet();
+            var vertices = vertex.getNexts();
             for (var entry : vertices) {
                 vertexIds.add(new VertexId(parent, entry.getKey(), entry.getValue().isTerminal()));
                 dfs(entry.getValue(), vertexIds.size() - 1);
