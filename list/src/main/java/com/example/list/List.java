@@ -1,24 +1,29 @@
 package com.example.list;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Collection;
+import java.util.AbstractList;
 import java.util.Iterator;
+import java.util.ListIterator;
 
-public class List<E> implements java.util.List {
-    private class Node {
+public class List<E> extends AbstractList<E> {
+    private class Node<E> {
         private Node next;
         private Node prev;
         private E element;
-        private Node(Node next, Node prev, E element) {
+        public Node(Node next, Node prev, E element) {
             this.next = next;
             this.prev = prev;
             this.element = element;
         }
+        public void setElement(E element) {
+            this.element = element;
+        }
     }
 
-    private class ListIterator<E> implements java.util.ListIterator {
-        private Node currentNode;
+    private Node head;
+    private int size;
+
+    private class ListIterator<E> implements java.util.ListIterator<E> {
+        private Node<E> currentNode;
         private int index;
 
         public ListIterator() {
@@ -32,10 +37,10 @@ public class List<E> implements java.util.List {
         }
 
         @Override
-        public Object next() {
+        public E next() {
             index++;
             currentNode = currentNode.next;
-            return currentNode;
+            return (E) currentNode.element;
         }
 
         @Override
@@ -44,10 +49,10 @@ public class List<E> implements java.util.List {
         }
 
         @Override
-        public Object previous() {
+        public E previous() {
             index--;
             currentNode = currentNode.prev;
-            return currentNode;
+            return (E) currentNode.element;
         }
 
         @Override
@@ -75,140 +80,63 @@ public class List<E> implements java.util.List {
         }
 
         @Override
-        public void set(Object o) {
+        public void set(E o) {
             if (o == null) {
                 throw new IllegalArgumentException("Null");
             }
-            currentNode.element = o;
+            currentNode.setElement(o);
         }
 
         @Override
-        public void add(Object o) {
-
+        public void add(E o) {
+            size++;
+            var newNode = new Node(currentNode, currentNode.prev, o);
+            if (hasPrevious()) {
+                currentNode.prev.next = newNode;
+            } else {
+                head = newNode;
+            }
+            currentNode.prev = newNode;
         }
     }
 
-    private Node head = null;
-    private int size = 0;
+    @Override
+    public E get(int index) {
+        for (var it = iterator(); it.hasNext() && it.nextIndex() <= index; ) {
+            if (it.nextIndex() == index) {
+                return (E) it.next();
+            }
+            it.next();
+        }
+        return null;
+    }
 
     @Override
     public int size() {
-        return size;
+        return size++;
     }
 
     @Override
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        return false;
-    }
-
-    @NotNull
-    @Override
-    public Iterator iterator() {
+    public E set(int index, E element) {
+        for (var it = iterator(); it.hasNext() && it.nextIndex() <= index; ) {
+            if (it.nextIndex() == index) {
+                var e = (E) it.next();
+                it.set(element);
+                return e;
+            }
+            it.next();
+        }
         return null;
     }
 
-    @NotNull
-    @Override
-    public Object[] toArray() {
-        return new Object[0];
+    public boolean add(E e) {
+        iterator().add(e);
+        return true;
     }
 
     @Override
-    public boolean add(Object o) {
-        return false;
+    public ListIterator iterator() {
+        return new ListIterator<>();
     }
 
-    @Override
-    public boolean remove(Object o) {
-        return false;
-    }
-
-    @Override
-    public boolean addAll(@NotNull Collection c) {
-        return false;
-    }
-
-    @Override
-    public boolean addAll(int index, @NotNull Collection c) {
-        return false;
-    }
-
-    @Override
-    public void clear() {
-
-    }
-
-    @Override
-    public Object get(int index) {
-        return null;
-    }
-
-    @Override
-    public Object set(int index, Object element) {
-        return null;
-    }
-
-    @Override
-    public void add(int index, Object element) {
-
-    }
-
-    @Override
-    public Object remove(int index) {
-        return null;
-    }
-
-    @Override
-    public int indexOf(Object o) {
-        return 0;
-    }
-
-    @Override
-    public int lastIndexOf(Object o) {
-        return 0;
-    }
-
-    @NotNull
-    @Override
-    public ListIterator listIterator() {
-        return null;
-    }
-
-    @NotNull
-    @Override
-    public ListIterator listIterator(int index) {
-        return null;
-    }
-
-    @NotNull
-    @Override
-    public java.util.List subList(int fromIndex, int toIndex) {
-        return null;
-    }
-
-    @Override
-    public boolean retainAll(@NotNull Collection c) {
-        return false;
-    }
-
-    @Override
-    public boolean removeAll(@NotNull Collection c) {
-        return false;
-    }
-
-    @Override
-    public boolean containsAll(@NotNull Collection c) {
-        return false;
-    }
-
-    @NotNull
-    @Override
-    public Object[] toArray(@NotNull Object[] a) {
-        return new Object[0];
-    }
 }
