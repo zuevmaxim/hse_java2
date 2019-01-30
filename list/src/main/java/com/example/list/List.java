@@ -21,6 +21,11 @@ public class List<E> implements java.util.List {
         private Node currentNode;
         private int index;
 
+        public ListIterator() {
+            currentNode = head;
+            index = 0;
+        }
+
         @Override
         public boolean hasNext() {
             return currentNode.next != null;
