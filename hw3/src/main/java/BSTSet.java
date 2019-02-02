@@ -18,6 +18,12 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
             height = 1;
         }
 
+        private void swapElements(Node<E> other) {
+            E tmp = other.element;
+            other.element = element;
+            element = tmp;
+        }
+
         private static int height(Node<?> node) {
             return node == null ? 0 : node.height;
         }
@@ -145,6 +151,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
 
+    @Override
     public boolean contains(@NotNull Object object) {
         if (root == null) {
             return false;
@@ -165,6 +172,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         return currentNode.balance();
     }
 
+    @Override
     public boolean add(@NotNull E element) {
         if (contains(element)) {
             return false;
@@ -177,6 +185,86 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         root = add(element, root, null);
         return true;
     }
+
+    private Node<E> next(@NotNull Node<E> currentNode) {
+        if (currentNode.right != null) {
+            currentNode = currentNode.right;
+            while (currentNode.left != null) {
+                currentNode = currentNode.left;
+            }
+        } else {
+            while (currentNode.parent != null
+                    && currentNode.parent.right == currentNode) {
+                currentNode = currentNode.parent;
+            }
+            currentNode = currentNode.parent;
+        }
+        return currentNode;
+    }
+
+    private Node<E> previous(@NotNull Node<E> currentNode) {
+        if (currentNode.left != null) {
+            currentNode = currentNode.left;
+            while (currentNode.right != null) {
+                currentNode = currentNode.right;
+            }
+        } else {
+            while (currentNode.parent != null
+                    && currentNode.parent.left == currentNode) {
+                currentNode = currentNode.parent;
+            }
+            currentNode = currentNode.parent;
+        }
+        return currentNode;
+    }
+
+    private Node<E> remove(E element, Node<E> currentNode) {
+        int result = compare(element, currentNode.element);
+        if (result < 0) {
+            return remove(element, currentNode.left);
+        }
+        if (result > 0) {
+            return remove(element, currentNode.right);
+        }
+        if (currentNode.left == null || currentNode.right == null) {
+            Node<E> son = null;
+            if (currentNode.left == null) {
+                son = currentNode.right;
+            }
+            if (currentNode.right == null) {
+                son = currentNode.left;
+            }
+            Node<E> currentNodeParent = currentNode.parent;
+            if (currentNodeParent != null) {
+                if (currentNodeParent.left == currentNode) {
+                    currentNodeParent.left = son;
+                } else {
+                    currentNodeParent.right = son;
+                }
+            }
+            if (son != null) {
+                son.parent = currentNodeParent;
+            }
+            return currentNodeParent == null
+                    ? son
+                    : currentNodeParent.cascadingBalance();
+        }
+
+        Node<E> next = next(currentNode);
+        currentNode.swapElements(next);
+        return remove(next.element, next);
+    }
+
+    @Override
+    public boolean remove(Object object) {
+        if (!contains(object)) {
+            return false;
+        }
+        --size;
+        root = remove((E)object, root);
+        return true;
+    }
+
 
     @Override
     public Iterator<E> descendingIterator() {

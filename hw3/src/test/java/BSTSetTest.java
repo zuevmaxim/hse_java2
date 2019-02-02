@@ -83,6 +83,50 @@ class BSTSetTest {
         }
     }
 
+    @Test
+    void removeFromEmpty() {
+        assertFalse(bstSet.remove(1));
+    }
+
+    @Test
+    void removeExistingElements() {
+        final int N = 100;
+        for (int i = 0; i < N; i++) {
+            bstSet.add(i);
+        }
+        for (int i = 0; i < N; i++) {
+            assertTrue(bstSet.remove(i));
+        }
+    }
+
+    @Test
+    void removeNonExistingElements() {
+        final int N = 100;
+        for (int i = 0; i < N; i++) {
+            bstSet.add(i);
+        }
+        for (int i = 0; i < N; i++) {
+            assertFalse(bstSet.remove(i + N));
+        }
+        for (int i = 0; i < N; i++) {
+            assertTrue(bstSet.contains(i));
+        }
+    }
+
+    @Test
+    void removeSizeTest() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        assertEquals(3, bstSet.size());
+        bstSet.remove(1);
+        assertEquals(2, bstSet.size());
+        bstSet.remove(1);
+        assertEquals(2, bstSet.size());
+        bstSet.remove(2);
+        assertEquals(1, bstSet.size());
+
+    }
 
 
     @Test
