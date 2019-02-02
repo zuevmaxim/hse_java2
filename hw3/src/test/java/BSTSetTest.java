@@ -182,19 +182,101 @@ class BSTSetTest {
     }
 
     @Test
-    void lower() {
+    void lowerEmpty() {
+        assertNull(bstSet.lower(1));
     }
 
     @Test
-    void floor() {
+    void lowerNotExists() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        assertNull(bstSet.lower(1));
     }
 
     @Test
-    void ceiling() {
+    void lowerExists() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        assertEquals(1, bstSet.lower(2));
+        assertEquals(2, bstSet.lower(3));
+        assertEquals(3, bstSet.lower(4));
     }
 
     @Test
-    void higher() {
+    void floorEmpty() {
+        assertNull(bstSet.floor(1));
+    }
+
+    @Test
+    void floorNotExists() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        assertNull(bstSet.higher(3));
+    }
+
+    @Test
+    void floorExists() {
+        bstSet.add(1);
+        bstSet.add(3);
+        bstSet.add(5);
+        assertEquals(1, bstSet.floor(1));
+        assertEquals(1, bstSet.floor(2));
+        assertEquals(3, bstSet.floor(3));
+        assertEquals(3, bstSet.floor(4));
+        assertEquals(5, bstSet.floor(5));
+        assertEquals(5, bstSet.floor(6));
+    }
+
+    @Test
+    void ceilingEmpty() {
+        assertNull(bstSet.ceiling(1));
+    }
+
+    @Test
+    void ceilingNotExists() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        assertNull(bstSet.ceiling(4));
+    }
+
+    @Test
+    void ceilingExists() {
+        bstSet.add(1);
+        bstSet.add(3);
+        bstSet.add(5);
+        assertEquals(1, bstSet.ceiling(0));
+        assertEquals(1, bstSet.ceiling(1));
+        assertEquals(3, bstSet.ceiling(2));
+        assertEquals(3, bstSet.ceiling(3));
+        assertEquals(5, bstSet.ceiling(4));
+        assertEquals(5, bstSet.ceiling(5));
+    }
+
+    @Test
+    void higherEmpty() {
+        assertNull(bstSet.higher(1));
+    }
+
+    @Test
+    void higherNotExists() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        assertNull(bstSet.higher(3));
+    }
+
+    @Test
+    void higherExists() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        assertEquals(1, bstSet.higher(0));
+        assertEquals(2, bstSet.higher(1));
+        assertEquals(3, bstSet.higher(2));
     }
 
     @Test

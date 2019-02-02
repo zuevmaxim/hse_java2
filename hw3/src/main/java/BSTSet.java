@@ -300,24 +300,61 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         return node.element;
     }
 
-    @Override
-    public E lower(E e) {
-        return null;
+    private enum CompareType { GE, GT, LE, LT }
+
+    private void boundedFind(E element, Node<E> currentNode, Node<E> bound, CompareType compareType) {
+        if (currentNode == null) {
+            return;
+        }
+        int result = compare(element, currentNode.element);
+        if (result < 0) {
+            if (compareType == CompareType.GT || compareType == CompareType.GE) {
+                bound.element = currentNode.element;
+            }
+            boundedFind(element, currentNode.left, bound, compareType);
+        } else if (result > 0) {
+            if (compareType == CompareType.LT || compareType == CompareType.LE) {
+                bound.element = currentNode.element;
+            }
+            boundedFind(element, currentNode.right, bound, compareType);
+        } else {
+            if (compareType == CompareType.LT) {
+                boundedFind(element, currentNode.left, bound, compareType);
+            } else if (compareType == CompareType.GT) {
+                boundedFind(element, currentNode.right, bound, compareType);
+            } else {
+                bound.element = currentNode.element;
+            }
+        }
+
     }
 
     @Override
-    public E floor(E e) {
-        return null;
+    public E lower(@NotNull E e) {
+        Node<E> result = new Node<>(null, null);
+        boundedFind(e, root, result, CompareType.LT);
+        return result.element;
     }
 
     @Override
-    public E ceiling(E e) {
-        return null;
+    public E floor(@NotNull E e) {
+        Node<E> result = new Node<>(null, null);
+        boundedFind(e, root, result, CompareType.LE);
+        return result.element;
     }
 
     @Override
-    public E higher(E e) {
-        return null;
+    public E ceiling(@NotNull E e) {
+        Node<E> result = new Node<>(null, null);
+        boundedFind(e, root, result, CompareType.GE);
+        return result.element;
+    }
+
+    @Override
+    public E higher(@NotNull E e) {
+        Node<E> result = new Node<>(null, null);
+        boundedFind(e, root, result, CompareType.GT);
+        return result.element;
     }
 
     @Override
