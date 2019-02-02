@@ -138,11 +138,47 @@ class BSTSetTest {
     }
 
     @Test
+    void firstEmpty() {
+        assertNull(bstSet.first());
+    }
+
+    @Test
     void first() {
+        bstSet.add(1);
+        bstSet.add(-1);
+        bstSet.add(0);
+        assertEquals(-1, bstSet.first());
+    }
+
+    @Test
+    void firstRemove() {
+        bstSet.add(1);
+        bstSet.add(-1);
+        bstSet.add(0);
+        bstSet.remove(-1);
+        assertEquals(0, bstSet.first());
+    }
+
+    @Test
+    void lastEmpty() {
+        assertNull(bstSet.last());
     }
 
     @Test
     void last() {
+        bstSet.add(1);
+        bstSet.add(-1);
+        bstSet.add(0);
+        assertEquals(1, bstSet.last());
+    }
+
+    @Test
+    void lastRemove() {
+        bstSet.add(1);
+        bstSet.add(-1);
+        bstSet.add(0);
+        bstSet.remove(1);
+        assertEquals(0, bstSet.last());
     }
 
     @Test

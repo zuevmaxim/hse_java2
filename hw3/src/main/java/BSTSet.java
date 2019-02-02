@@ -278,12 +278,26 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
     @Override
     public E first() {
-        return null;
+        if (root == null) {
+            return null;
+        }
+        Node<E> node = root;
+        while (node.left != null) {
+            node = node.left;
+        }
+        return node.element;
     }
 
     @Override
     public E last() {
-        return null;
+        if (root == null) {
+            return null;
+        }
+        Node<E> node = root;
+        while (node.right != null) {
+            node = node.right;
+        }
+        return node.element;
     }
 
     @Override
