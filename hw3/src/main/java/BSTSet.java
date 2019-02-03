@@ -1,3 +1,4 @@
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -271,6 +272,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      * @param parent parent of currentNode
      * @return new root of the subtree(could change after rotations)
      */
+    @Contract("_, null, _ -> new")
     @NotNull
     private Node<E> add(@NotNull E element, @Nullable Node<E> currentNode, @Nullable Node<E> parent) {
         if (currentNode == null) {
