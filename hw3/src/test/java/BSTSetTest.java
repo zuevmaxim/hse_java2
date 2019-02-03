@@ -33,6 +33,13 @@ class BSTSetTest {
     }
 
     @Test
+    void nonComparableTypeWithoutComparator() {
+        BSTSet<Time> a = new BSTSet<>();
+        a.add(new Time(1, 1));
+        assertThrows(ClassCastException.class, () -> a.contains(new Time(1, 1)));
+    }
+
+    @Test
     void sizeEmpty() {
         assertEquals(0, bstSet.size());
     }
@@ -79,6 +86,11 @@ class BSTSetTest {
     @Test
     void containsEmptySet() {
         assertFalse(bstSet.contains(1));
+    }
+
+    @Test
+    void containsNullElement() {
+        assertThrows(IllegalArgumentException.class, () -> bstSet.contains(null));
     }
 
     @Test
@@ -135,6 +147,11 @@ class BSTSetTest {
     }
 
     @Test
+    void addNullElement() {
+        assertThrows(IllegalArgumentException.class, () -> bstSet.add(null));
+    }
+
+    @Test
     void addToEmptySetComparator() {
         assertTrue(timeBSTSet.add(new Time(1, 1)));
     }
@@ -182,6 +199,11 @@ class BSTSetTest {
     @Test
     void removeFromEmpty() {
         assertFalse(bstSet.remove(1));
+    }
+
+    @Test
+    void removeNullElement() {
+        assertThrows(IllegalArgumentException.class, () -> bstSet.remove(null));
     }
 
     @Test
@@ -329,6 +351,11 @@ class BSTSetTest {
     }
 
     @Test
+    void lowerNullElement() {
+        assertThrows(IllegalArgumentException.class, () -> bstSet.lower(null));
+    }
+
+    @Test
     void lowerNotExists() {
         bstSet.add(1);
         bstSet.add(2);
@@ -349,6 +376,11 @@ class BSTSetTest {
     @Test
     void floorEmpty() {
         assertNull(bstSet.floor(1));
+    }
+
+    @Test
+    void floorNullElement() {
+        assertThrows(IllegalArgumentException.class, () -> bstSet.floor(null));
     }
 
     @Test
@@ -378,6 +410,11 @@ class BSTSetTest {
     }
 
     @Test
+    void ceilingNullElement() {
+        assertThrows(IllegalArgumentException.class, () -> bstSet.ceiling(null));
+    }
+
+    @Test
     void ceilingNotExists() {
         bstSet.add(1);
         bstSet.add(2);
@@ -401,6 +438,11 @@ class BSTSetTest {
     @Test
     void higherEmpty() {
         assertNull(bstSet.higher(1));
+    }
+
+    @Test
+    void higherNullElement() {
+        assertThrows(IllegalArgumentException.class, () -> bstSet.higher(null));
     }
 
     @Test
