@@ -1,15 +1,36 @@
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class BSTSetTest {
-
     private BSTSet<Integer> bstSet;
+    private final int N = 10;
+
+    private static class Time {
+        private int hours;
+        private int minutes;
+        public Time(int hours, int minutes) {
+            this.hours = hours;
+            this.minutes = minutes;
+        }
+    }
+
+    private BSTSet<Time> timeBSTSet;
 
     @BeforeEach
     void setUp() {
         bstSet = new BSTSet<>();
+        timeBSTSet = new BSTSet<>((Time a, Time b) -> {
+            if (a.hours == b.hours) {
+                if (a.minutes == b.minutes) {
+                    return 0;
+                }
+                return a.minutes < b.minutes ? -1 : 1;
+            }
+            return a.hours < b.hours ? -1 : 1;
+        });
     }
 
     @Test
@@ -18,12 +39,25 @@ class BSTSetTest {
     }
 
     @Test
+    void sizeEmptyComparator() {
+        assertEquals(0, timeBSTSet.size());
+    }
+
+
+    @Test
     void sizeNonRepeatingElements() {
-        final int N = 100;
         for (int i = 0; i < N; i++) {
             bstSet.add(i);
         }
         assertEquals(N, bstSet.size());
+    }
+
+    @Test
+    void sizeNonRepeatingElementsComparator() {
+        for (int i = 0; i < N; i++) {
+            timeBSTSet.add(new Time(N - i, i + 10));
+        }
+        assertEquals(N, timeBSTSet.size());
     }
 
     @Test
@@ -35,18 +69,42 @@ class BSTSetTest {
     }
 
     @Test
+    void sizeRepeatingElementsComparator() {
+        var time = new Time(1, 1);
+        timeBSTSet.add(time);
+        timeBSTSet.add(time);
+        timeBSTSet.add(time);
+        assertEquals(1, timeBSTSet.size());
+    }
+
+    @Test
     void containsEmptySet() {
         assertFalse(bstSet.contains(1));
     }
 
     @Test
+    void containsEmptySetComparator() {
+        assertFalse(timeBSTSet.contains(new Time(0, 0)));
+    }
+
+
+    @Test
     void containsExistingElements() {
-        final int N = 100;
         for (int i = 0; i < N; i++) {
-            bstSet.add(i);
+            bstSet.add(N -1 - i);
         }
         for (int i = 0; i < N; i++) {
             assertTrue(bstSet.contains(i));
+        }
+    }
+
+    @Test
+    void containsExistingElementsComparator() {
+        for (int i = 0; i < N; i++) {
+            timeBSTSet.add(new Time(0, N - 1 - i));
+        }
+        for (int i = 0; i < N; i++) {
+            assertTrue(timeBSTSet.contains(new Time(0, i)));
         }
     }
 
@@ -62,24 +120,63 @@ class BSTSetTest {
     }
 
     @Test
+    void containsNonExistingElementsComparator() {
+        for (int i = 0; i < 5; i++) {
+            timeBSTSet.add(new Time(i, 2 * i));
+        }
+        assertFalse(timeBSTSet.contains(new Time(1, 1)));
+        assertFalse(timeBSTSet.contains(new Time(3, 3)));
+        assertFalse(timeBSTSet.contains(new Time(5, 5)));
+
+    }
+
+    @Test
     void addToEmptySet() {
         assertTrue(bstSet.add(1));
     }
 
     @Test
+    void addToEmptySetComparator() {
+        assertTrue(timeBSTSet.add(new Time(1, 1)));
+    }
+
+    @Test
     void addsNonRepeatingElements() {
-        final int N = 100;
         for (int i = 0; i < N; i++) {
             assertTrue(bstSet.add(i));
         }
     }
 
     @Test
+    void addsNonRepeatingElementsComparator() {
+        for (int i = 0; i < N; i++) {
+            assertTrue(timeBSTSet.add(new Time(i, 0)));
+        }
+    }
+
+    @Test
     void addRepeatingElements() {
-        final int N = 100;
         for (int i = 0; i < N; i++) {
             assertTrue(bstSet.add(i));
             assertFalse(bstSet.add(i));
+        }
+    }
+
+    @Test
+    void addElementsInDisorder() {
+        assertTrue(bstSet.add(2));
+        assertTrue(bstSet.add(1));
+        assertTrue(bstSet.add(5));
+        assertTrue(bstSet.add(4));
+        assertTrue(bstSet.add(6));
+        assertTrue(bstSet.add(3));
+    }
+
+    @Test
+    void addRepeatingElementsComparator() {
+        for (int i = 0; i < N; i++) {
+            assertTrue(timeBSTSet.add(new Time(i, i)));
+            assertFalse(timeBSTSet.add(new Time(i, i)));
         }
     }
 
@@ -89,8 +186,12 @@ class BSTSetTest {
     }
 
     @Test
+    void removeFromEmptyComparator() {
+        assertFalse(timeBSTSet.remove(new Time(1, 1)));
+    }
+
+    @Test
     void removeExistingElements() {
-        final int N = 100;
         for (int i = 0; i < N; i++) {
             bstSet.add(i);
         }
@@ -100,8 +201,29 @@ class BSTSetTest {
     }
 
     @Test
+    void removeExistingElementsInDisorder() {
+        for (int i = 0; i < 5; i++) {
+            bstSet.add(i);
+        }
+        assertTrue(bstSet.remove(3));
+        assertTrue(bstSet.remove(4));
+        assertTrue(bstSet.remove(1));
+        assertTrue(bstSet.remove(0));
+        assertTrue(bstSet.remove(2));
+    }
+
+    @Test
+    void removeExistingElementsComparator() {
+        for (int i = 0; i < N; i++) {
+            timeBSTSet.add(new Time(N - 1 - i, i));
+        }
+        for (int i = 0; i < N; i++) {
+            assertTrue(timeBSTSet.remove(new Time(N - 1 -i, i)));
+        }
+    }
+
+    @Test
     void removeNonExistingElements() {
-        final int N = 100;
         for (int i = 0; i < N; i++) {
             bstSet.add(i);
         }
@@ -142,6 +264,21 @@ class BSTSetTest {
         var descendingSet = bstSet.descendingSet();
         assertEquals(3, descendingSet.first());
         assertEquals(1, descendingSet.last());
+    }
+
+    @Disabled
+    @Test
+    void descendingSetConnection() {
+        var descendingSet = bstSet.descendingSet();
+        for (int i = 0; i < N; i++) {
+            descendingSet.add(2 * i);
+        }
+        descendingSet.add(N - 1);
+        for (int i = 0; i < N; i++) {
+            assertTrue(bstSet.contains(2 * i));
+            assertFalse(descendingSet.contains(2 * i));
+        }
+        assertTrue(bstSet.contains(N - 1));
     }
 
     @Test
@@ -294,7 +431,6 @@ class BSTSetTest {
 
     @Test
     void iterator() {
-        final int N = 100;
         for (int i = 0; i < N; ++i) {
             bstSet.add(i);
         }
@@ -312,7 +448,6 @@ class BSTSetTest {
 
     @Test
     void descendingIterator() {
-        final int N = 100;
         for (int i = 0; i < N; ++i) {
             bstSet.add(i);
         }
