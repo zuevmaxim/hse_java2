@@ -134,7 +134,19 @@ class BSTSetTest {
     }
 
     @Test
+    void descendingEmptySet() {
+        var descendingSet = bstSet.descendingSet();
+        assertEquals(0, descendingSet.size());
+    }
+
+    @Test
     void descendingSet() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        var descendingSet = bstSet.descendingSet();
+        assertEquals(3, descendingSet.first());
+        assertEquals(1, descendingSet.last());
     }
 
     @Test
@@ -280,6 +292,20 @@ class BSTSetTest {
     }
 
     @Test
+    void iteratorEmpty() {
+        var it = bstSet.iterator();
+        assertFalse(it.hasNext());
+    }
+
+    @Test
     void iterator() {
+        final int N = 100;
+        for (int i = 0; i < N; ++i) {
+            bstSet.add(i);
+        }
+        int i = 0;
+        for (var it = bstSet.iterator(); it.hasNext();i++) {
+            assertEquals(i, it.next());
+        }
     }
 }
