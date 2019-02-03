@@ -1,3 +1,5 @@
+package com.hse.java.treeSet;
+
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -148,7 +150,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * Checks if rotation is needed, exactly, rotates if |height(left) - height(right)| > 1
+         * Checks if rotation is needed, exactly,
+         * rotates if |height(left) - height(right)| > 1
          * @return the highest node after rotation
          */
         @NotNull
@@ -194,7 +197,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      * If elements cannot be compared, ClassCastException can be thrown
      */
     public BSTSet() {
-        comparator = (@NotNull E a, @NotNull E b) -> ((Comparable<? super E>)a).compareTo(b);
+        comparator = (@NotNull E a, @NotNull E b) ->
+                ((Comparable<? super E>) a).compareTo(b);
     }
 
     /**
@@ -274,7 +278,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      */
     @Contract("_, null, _ -> new")
     @NotNull
-    private Node<E> add(@NotNull E element, @Nullable Node<E> currentNode, @Nullable Node<E> parent) {
+    private Node<E> add(@NotNull E element,
+                        @Nullable Node<E> currentNode, @Nullable Node<E> parent) {
         if (currentNode == null) {
             return new Node<>(element, parent);
         }
@@ -402,12 +407,15 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         if (!contains(object)) {
             return false;
         }
-        --size;
-        root = remove((E)object, root);
+        size--;
+        root = remove((E) object, root);
         updateDescendingSet();
         return true;
     }
 
+    /**
+     * Returns an iterator over the elements in this set in descending order.
+     */
     @Override
     @NotNull
     public Iterator<E> descendingIterator() {
@@ -592,6 +600,9 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         return result.element;
     }
 
+    /**
+     * Returns an iterator over the elements in this set in ascending order.
+     */
     @Override
     @NotNull
     public Iterator<E> iterator() {
@@ -664,6 +675,9 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
     }
 
+    /**
+     * Returns the number of elements in this set
+     */
     @Override
     public int size() {
         return size;
