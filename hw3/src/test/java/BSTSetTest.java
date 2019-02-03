@@ -1,5 +1,4 @@
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,8 +8,8 @@ class BSTSetTest {
     private final int N = 10;
 
     private static class Time {
-        private int hours;
-        private int minutes;
+        private final int hours;
+        private final int minutes;
         public Time(int hours, int minutes) {
             this.hours = hours;
             this.minutes = minutes;
@@ -266,7 +265,6 @@ class BSTSetTest {
         assertEquals(1, descendingSet.last());
     }
 
-    @Disabled
     @Test
     void descendingSetConnection() {
         var descendingSet = bstSet.descendingSet();
@@ -276,7 +274,7 @@ class BSTSetTest {
         descendingSet.add(N - 1);
         for (int i = 0; i < N; i++) {
             assertTrue(bstSet.contains(2 * i));
-            assertFalse(descendingSet.contains(2 * i));
+            assertTrue(descendingSet.contains(2 * i));
         }
         assertTrue(bstSet.contains(N - 1));
     }

@@ -177,7 +177,9 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
     private Node<E> root = null;
     private int size = 0;
-    private Comparator<? super E> comparator;
+    private final Comparator<? super E> comparator;
+    private BSTSet<E> descendingBSTSet;
+    private boolean descendingOrder = false;
 
     /**
      * Constructs empty BSTSet. Natural comparator is used.
@@ -195,9 +197,33 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
     /**
      * Compare E elements using comparator if it is given
+     * Used for navigation in the tree
      */
     private int compare(E a, E b) {
         return comparator.compare(a, b);
+    }
+
+    /**
+     * Compare E elements for ordering
+     * It is different for descending copy
+     */
+    private int compareOrder(E a, E b) {
+        if (descendingOrder) {
+            return comparator.compare(b, a);
+        }
+        return comparator.compare(a, b);
+    }
+
+    /**
+     * Update the connection with descending copy
+     * Should be called after every set modification
+     */
+    private void updateDescendingSet() {
+        if (descendingBSTSet == null) {
+            return;
+        }
+        descendingBSTSet.root = root;
+        descendingBSTSet.size = size;
     }
 
     /**
@@ -260,11 +286,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
             return false;
         }
         size++;
-        if (root == null) {
-            root = new Node<>(element, null);
-            return true;
-        }
         root = add(element, root, null);
+        updateDescendingSet();
         return true;
     }
 
@@ -365,9 +388,9 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
         --size;
         root = remove((E)object, root);
+        updateDescendingSet();
         return true;
     }
-
 
     @Override
     public Iterator<E> descendingIterator() {
@@ -379,10 +402,10 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      */
     @Override
     public MyTreeSet<E> descendingSet() {
-        BSTSet<E> descendingBSTSet = new BSTSet<>();
-        descendingBSTSet.size = size;
-        descendingBSTSet.comparator = (E a, E b) -> compare(b, a);
-        descendingBSTSet.root = root;
+        descendingBSTSet = new BSTSet<>(comparator);
+        descendingBSTSet.descendingBSTSet = this;
+        descendingBSTSet.descendingOrder = true;
+        updateDescendingSet();
         return descendingBSTSet;
     }
 
@@ -392,11 +415,11 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     private Node<E> firstNode() {
         Node<E> node = root;
         while (node != null) {
-            if (node.left != null && compare(node.element, node.left.element) > 0) {
+            if (node.left != null && compareOrder(node.element, node.left.element) > 0) {
                 node = node.left;
                 continue;
             }
-            if (node.right != null && compare(node.element, node.right.element) > 0) {
+            if (node.right != null && compareOrder(node.element, node.right.element) > 0) {
                 node = node.right;
                 continue;
             }
@@ -435,11 +458,11 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     private Node<E>  lastNode() {
         Node<E> node = root;
         while (node != null) {
-            if (node.left != null && compare(node.element, node.left.element) < 0) {
+            if (node.left != null && compareOrder(node.element, node.left.element) < 0) {
                 node = node.left;
                 continue;
             }
-            if (node.right != null && compare(node.element, node.right.element) < 0) {
+            if (node.right != null && compareOrder(node.element, node.right.element) < 0) {
                 node = node.right;
                 continue;
             }
@@ -472,7 +495,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         if (currentNode == null) {
             return;
         }
-        int result = compare(element, currentNode.element);
+        int result = compareOrder(element, currentNode.element);
         if (result < 0) {
             if (compareType == CompareType.GT || compareType == CompareType.GE) {
                 bound.element = currentNode.element;
@@ -492,7 +515,6 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
                 bound.element = currentNode.element;
             }
         }
-
     }
 
     /**
@@ -544,7 +566,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     @Override
-    public Iterator<E> iterator() {
+    public @NotNull Iterator<E> iterator() {
         return new TreeIterator();
     }
 
