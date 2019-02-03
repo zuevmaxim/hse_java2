@@ -385,7 +385,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         Node<E> next = nextNode(currentNode);
-        currentNode.swapElements(next);
+        currentNode.swapElements(next); // cannot be null as current node has right child
         return remove(next.element, next);
     }
 

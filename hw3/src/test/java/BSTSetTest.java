@@ -34,9 +34,9 @@ class BSTSetTest {
 
     @Test
     void nonComparableTypeWithoutComparator() {
-        BSTSet<Time> a = new BSTSet<>();
-        a.add(new Time(1, 1));
-        assertThrows(ClassCastException.class, () -> a.contains(new Time(1, 1)));
+        BSTSet<Time> timeSetWithoutComparator = new BSTSet<>();
+        timeSetWithoutComparator.add(new Time(1, 1));
+        assertThrows(ClassCastException.class, () -> timeSetWithoutComparator.contains(new Time(1, 1)));
     }
 
     @Test
