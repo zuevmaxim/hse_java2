@@ -128,11 +128,6 @@ class BSTSetTest {
 
     }
 
-
-    @Test
-    void descendingIterator() {
-    }
-
     @Test
     void descendingEmptySet() {
         var descendingSet = bstSet.descendingSet();
@@ -305,6 +300,24 @@ class BSTSetTest {
         }
         int i = 0;
         for (var it = bstSet.iterator(); it.hasNext();i++) {
+            assertEquals(i, it.next());
+        }
+    }
+
+    @Test
+    void descendingIteratorEmpty() {
+        var it = bstSet.descendingIterator();
+        assertFalse(it.hasNext());
+    }
+
+    @Test
+    void descendingIterator() {
+        final int N = 100;
+        for (int i = 0; i < N; ++i) {
+            bstSet.add(i);
+        }
+        int i = N - 1;
+        for (var it = bstSet.descendingIterator(); it.hasNext();i--) {
             assertEquals(i, it.next());
         }
     }

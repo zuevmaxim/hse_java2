@@ -371,7 +371,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
     @Override
     public Iterator<E> descendingIterator() {
-        return null;
+        return new TreeDescendingIterator();
     }
 
     /**
@@ -577,6 +577,39 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         public E next() {
             E next = nextNode.element;
             nextNode = nextNode(nextNode);
+            return next;
+        }
+    }
+
+    /**
+     * Tree iterator provides an ability to iterate in the BSTSet in a reverse order.
+     */
+    private class TreeDescendingIterator implements Iterator<E> {
+        private Node<E> nextNode;
+
+        /**
+         * Construct iterator. Starts from the greatest element.
+         */
+        public TreeDescendingIterator() {
+            nextNode = lastNode();
+        }
+
+        /**
+         * Checks if there is next element in the set
+         */
+        @Override
+        public boolean hasNext() {
+            return nextNode != null;
+        }
+
+        /**
+         * Move iterator to the next element.
+         * @return next element
+         */
+        @Override
+        public E next() {
+            E next = nextNode.element;
+            nextNode = previousNode(nextNode);
             return next;
         }
     }
