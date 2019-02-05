@@ -428,10 +428,12 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @NotNull
     public MyTreeSet<E> descendingSet() {
-        descendingBSTSet = new BSTSet<>(comparator);
-        descendingBSTSet.descendingBSTSet = this;
-        descendingBSTSet.descendingOrder = !descendingOrder;
-        updateDescendingSet();
+        if (descendingBSTSet == null) {
+            descendingBSTSet = new BSTSet<>(comparator);
+            descendingBSTSet.descendingBSTSet = this;
+            descendingBSTSet.descendingOrder = !descendingOrder;
+            updateDescendingSet();
+        }
         return descendingBSTSet;
     }
 

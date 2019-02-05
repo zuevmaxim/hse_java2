@@ -314,6 +314,14 @@ class BSTSetTest {
     }
 
     @Test
+    void descendingDescendingSetConnection() {
+        var descendingDescendingSet = bstSet.descendingSet().descendingSet();
+        descendingDescendingSet.add(1);
+        assertTrue(bstSet.contains(1));
+        assertSame(descendingDescendingSet, bstSet);
+    }
+
+    @Test
     void firstEmpty() {
         assertNull(bstSet.first());
     }
