@@ -14,18 +14,35 @@ import java.util.Iterator;
  */
 public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     /**
-     * Tree node
+     * Tree node.
      * @param <E> the type of elements maintained by this node
      */
     private static class Node<E> {
+        /**
+         * Element that node contains.
+         */
         private E element;
+        /**
+         * Left child. All the elements in the left subtree
+         * are less then the element.
+         */
         private Node<E> left;
+        /**
+         * Right child. All the elements in the right subtree
+         * are greater then the element.
+         */
         private Node<E> right;
+        /**
+         * Node's parent in the subtree.
+         */
         private Node<E> parent;
+        /**
+         * Node's height from the bottom of the tree.
+         */
         private int height;
 
         /**
-         * Constructs node with null left/right children
+         * Constructs node with null left/right children.
          * @param element value to contain
          * @param parent node's parent in the tree
          */
@@ -36,7 +53,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * Swap element fields in this and other nodes
+         * Swap element fields in this and other nodes.
          * @param other other node to swap with
          */
         private void swapElements(@NotNull Node<E> other) {
@@ -46,7 +63,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * Node height in the tree
+         * Node height in the tree.
          * @return node height or 0 if node is null
          */
         private static int height(@Nullable Node<?> node) {
@@ -54,21 +71,21 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * Difference between left and right children height
+         * Difference between left and right children height.
          */
         private int getLeftRightDiff() {
             return height(left) - height(right);
         }
 
         /**
-         * Update node's height using children's height
+         * Update node's height using children's height.
          */
         private void updateHeight() {
             height = 1 + Math.max(height(left), height(right));
         }
 
         /**
-         * AVL right rotation
+         * AVL right rotation.
          * @return the highest node after rotation
          */
         @NotNull
@@ -99,7 +116,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * AVL left rotation
+         * AVL left rotation.
          * @return the highest node after rotation
          */
         @NotNull
@@ -130,7 +147,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * AVL big right rotation
+         * AVL big right rotation.
          * @return the highest node after rotation
          */
         @NotNull
@@ -140,7 +157,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * AVL big left rotation
+         * AVL big left rotation.
          * @return the highest node after rotation
          */
         @NotNull
@@ -151,7 +168,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
         /**
          * Checks if rotation is needed, exactly,
-         * rotates if |height(left) - height(right)| > 1
+         * rotates if |height(left) - height(right)| > 1.
          * @return the highest node after rotation
          */
         @NotNull
@@ -186,10 +203,26 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
     }
 
+    /**
+     * AVL tree root.
+     */
     private Node<E> root = null;
+    /**
+     * The number of elements in the set.
+     */
     private int size = 0;
+    /**
+     * Comparator for navigating in the tree and comparing elements.
+     */
     private final Comparator<? super E> comparator;
+    /**
+     * Descending set copy.
+     * It is saved in order to update connection with it.
+     */
     private BSTSet<E> descendingBSTSet;
+    /**
+     * True iff elements are sorted in a descending order.
+     */
     private boolean descendingOrder = false;
 
     /**
@@ -202,22 +235,25 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Constructs empty BSTSet. Given comparator is used.
+     * Constructs empty BSTSet with comparator.
+     * @param comparator comparator used for comparing set elements.
      */
     public BSTSet(@NotNull Comparator<? super E> comparator) {
         this.comparator = comparator;
     }
 
     /**
-     * Compare E elements using comparator if it is given
-     * Used for navigation in the tree
+     * Compare E elements using comparator if it is given.
+     * Used for navigation in the tree.
+     * @return 0, if a == b, integer less then 0, if a < b,
+     *  integer greater then 0, if a > b
      */
     private int compare(@NotNull E a, @NotNull E b) {
         return comparator.compare(a, b);
     }
 
     /**
-     * Compare E elements for ordering
+     * Compare E elements for ordering.
      * It is different for descending copy
      */
     private int compareOrder(@NotNull E a, @NotNull E b) {
@@ -228,7 +264,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Update the connection with descending copy
+     * Update the connection with descending copy.
      * Should be called after every set modification
      */
     private void updateDescendingSet() {
@@ -240,7 +276,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Checks if element is included into the subtree
+     * Checks if element is included into the subtree.
      * @param element element to be checked for containment in the subtree
      * @param currentNode root of the subtree
      * @return true if this subtree contains the specified element
@@ -256,7 +292,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Checks if element is included into the set
+     * Checks if element is included into the set.
      * @param object object to be checked for containment in this set
      * @throws ClassCastException if object cannot be cased to E
      * @return true if this set contains the specified element
@@ -270,7 +306,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Add element to the subtree
+     * Add element to the subtree.
      * @param element element to add
      * @param currentNode root of the subtree
      * @param parent parent of currentNode
@@ -293,7 +329,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Add element to the set
+     * Add element to the set.
      * @param element element to add
      * @return true if there was no such element
      */
@@ -309,7 +345,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find next element after currentNode
+     * Find next element after currentNode.
      * @param currentNode node to start from
      * @return node containing next element or null if there is none
      */
@@ -331,7 +367,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find previous element before currentNode
+     * Find previous element before currentNode.
      * @param currentNode node to start from
      * @return node containing previous element or null if there is none
      */
@@ -353,7 +389,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Remove element from the subtree
+     * Remove element from the subtree.
      * @param element element to remove
      * @param currentNode root of the subtree
      * @return new root of the subtree
@@ -397,7 +433,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Remove object from the set
+     * Remove object from the set.
      * @param object object to remove
      * @throws ClassCastException if object cannot be casted to E
      * @return true if there was such object
@@ -438,7 +474,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the node containing the lowest element in the set or null if there is none
+     * Find the node containing the lowest element in the set
+     * or null if there is none.
      */
     @Nullable
     private Node<E> firstNode() {
@@ -458,7 +495,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the lowest element in the set or null if there is none
+     * Find the lowest element in the set
+     * or null if there is none.
      */
     @Override
     @Nullable
@@ -471,7 +509,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the highest element in the set or null if there is none
+     * Find the highest element in the set
+     * or null if there is none.
      */
     @Override
     @Nullable
@@ -484,7 +523,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the node containing the lowest element in the set or null if there is none
+     * Find the node containing the lowest element in the set
+     * or null if there is none.
      */
     @Nullable
     private Node<E>  lastNode() {
@@ -504,7 +544,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Type of comparator:
+     * Type of comparator.
      * GE (>=) greater or equal
      * GT (>)  greater then
      * LE (<=) less or equal
@@ -513,7 +553,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     private enum CompareType { GE, GT, LE, LT }
 
     /**
-     * Find a bound of element in the subtree
+     * Find a bound of element in the subtree.
      * @param element element to analyse
      * @param currentNode root of the subtree
      * @param bound node to save bound
@@ -551,7 +591,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the greatest element less then given one
+     * Find the greatest element less then given one.
      * @param e element to find bound
      * @return bound or null if none
      */
@@ -564,7 +604,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the greatest element less or equal then given one
+     * Find the greatest element less or equal then given one.
      * @param e element to find bound
      * @return bound or null if none
      */
@@ -577,7 +617,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the smallest element greater or equal then given one
+     * Find the smallest element greater or equal then given one.
      * @param e element to find bound
      * @return bound or null if none
      */
@@ -590,7 +630,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the smallest element greater then given one
+     * Find the smallest element greater then given one.
      * @param e element to find bound
      * @return bound or null if none
      */
@@ -625,7 +665,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * Checks if there is next element in the set
+         * Checks if there is next element in the set.
          */
         @Override
         public boolean hasNext() {
@@ -645,7 +685,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Tree iterator provides an ability to iterate in the BSTSet in a reverse order.
+     * Tree iterator provides an ability to iterate
+     * in the BSTSet in a reverse order.
      */
     private class TreeDescendingIterator implements Iterator<E> {
         private Node<E> nextNode;
@@ -658,7 +699,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
-         * Checks if there is next element in the set
+         * Checks if there is next element in the set.
          */
         @Override
         public boolean hasNext() {
@@ -678,7 +719,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Returns the number of elements in this set
+     * Returns the number of elements in this set.
      */
     @Override
     public int size() {
