@@ -14,7 +14,9 @@ class ListTest {
     }
 
     @Test
-    void get() {
+    void getNonExisting() {
+        assertNull(list.get(-1));
+        assertNull(list.get(2));
     }
 
     @Test
@@ -22,6 +24,11 @@ class ListTest {
         list.add(1);
         list.add(2);
         assertEquals(2, list.size());
+    }
+
+    @Test
+    void sizeEmpty() {
+        assertEquals(0, list.size());
     }
 
     @Test

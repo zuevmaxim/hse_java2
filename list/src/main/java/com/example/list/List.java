@@ -1,28 +1,25 @@
 package com.example.list;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.AbstractList;
-import java.util.Iterator;
-import java.util.ListIterator;
 
 public class List<E> extends AbstractList<E> {
-    private class Node<E> {
-        private Node next;
-        private Node prev;
-        private E element;
-        public Node(Node next, Node prev, E element) {
+    private class Node<T> {
+        private Node<T> next;
+        private Node<T> prev;
+        private T element;
+        public Node(Node<T> next, Node<T> prev, T element) {
             this.next = next;
             this.prev = prev;
             this.element = element;
         }
-        public void setElement(E element) {
-            this.element = element;
-        }
     }
 
-    private Node head;
+    private Node<E> head = new Node<>(null, null, null);
     private int size;
 
-    private class ListIterator<E> implements java.util.ListIterator<E> {
+    private class ListIterator implements java.util.ListIterator<E> {
         private Node<E> currentNode;
         private int index;
 
@@ -33,14 +30,15 @@ public class List<E> extends AbstractList<E> {
 
         @Override
         public boolean hasNext() {
-            return currentNode.next != null;
+            return currentNode != null;
         }
 
         @Override
         public E next() {
             index++;
+            E value = currentNode.element;
             currentNode = currentNode.next;
-            return (E) currentNode.element;
+            return value;
         }
 
         @Override
@@ -52,12 +50,12 @@ public class List<E> extends AbstractList<E> {
         public E previous() {
             index--;
             currentNode = currentNode.prev;
-            return (E) currentNode.element;
+            return currentNode.element;
         }
 
         @Override
         public int nextIndex() {
-            return index + 1;
+            return index;
         }
 
         @Override
@@ -80,23 +78,20 @@ public class List<E> extends AbstractList<E> {
         }
 
         @Override
-        public void set(E o) {
-            if (o == null) {
-                throw new IllegalArgumentException("Null");
-            }
-            currentNode.setElement(o);
+        public void set(Object o) {
+            currentNode.element = (E) o;
         }
 
         @Override
-        public void add(E o) {
+        public void add(Object o) {
             size++;
-            var newNode = new Node(currentNode, currentNode.prev, o);
+            Node<E> newNode = new Node<>(currentNode, currentNode.prev, (E) o);
             if (hasPrevious()) {
                 currentNode.prev.next = newNode;
             } else {
                 head = newNode;
             }
-            currentNode.prev = newNode;
+            currentNode = newNode;
         }
     }
 
@@ -104,7 +99,7 @@ public class List<E> extends AbstractList<E> {
     public E get(int index) {
         for (var it = iterator(); it.hasNext() && it.nextIndex() <= index; ) {
             if (it.nextIndex() == index) {
-                return (E) it.next();
+                return it.next();
             }
             it.next();
         }
@@ -113,7 +108,7 @@ public class List<E> extends AbstractList<E> {
 
     @Override
     public int size() {
-        return size++;
+        return size;
     }
 
     @Override
@@ -135,8 +130,9 @@ public class List<E> extends AbstractList<E> {
     }
 
     @Override
+    @NotNull
     public ListIterator iterator() {
-        return new ListIterator<>();
+        return new ListIterator();
     }
 
 }
