@@ -304,6 +304,16 @@ class BSTSetTest {
     }
 
     @Test
+    void descendingDescendingSet() {
+        bstSet.add(1);
+        bstSet.add(2);
+        bstSet.add(3);
+        var descendingDescendingSet = bstSet.descendingSet().descendingSet();
+        assertEquals(1, descendingDescendingSet.first());
+        assertEquals(3, descendingDescendingSet.last());
+    }
+
+    @Test
     void firstEmpty() {
         assertNull(bstSet.first());
     }
