@@ -69,4 +69,48 @@ public class SmartList<E>  extends AbstractList<E> implements List<E> {
         return (E) ((ArrayList<Object>) data).set(index, element);
     }
 
+    @Override
+    public void add(int index, E element) throws IndexOutOfBoundsException {
+        if (size == 0 && index == 0) {
+            data = element;
+            size++;
+            return;
+        }
+        if (index > size || index < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (size == 1) {
+            size++;
+            var tmp = data;
+            data = new Object[5];
+            if (index == 0) {
+                ((Object[]) data)[0] = element;
+                ((Object[]) data)[1] = tmp;
+            } else {
+                ((Object[]) data)[0] = tmp;
+                ((Object[]) data)[1] = element;
+            }
+            return;
+        }
+        if (size < 5) {
+            var tmpData = (Object[]) data;
+            for (int i = size - 1; i >= index; i--) {
+                tmpData[i + 1] = tmpData[i];
+            }
+            size++;
+            tmpData[index] = element;
+        }
+        if (size == 5) {
+            size++;
+            var tmp = data;
+            data = new ArrayList<>();
+            for (int i = 0; i < 5; ++i) {
+                ((ArrayList) data).add(((Object[])tmp)[i]);
+            }
+            ((ArrayList) data).add(index, element);
+        }
+        size++;
+        ((ArrayList) data).add(index, element);
+    }
+
 }

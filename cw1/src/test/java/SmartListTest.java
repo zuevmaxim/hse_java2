@@ -38,15 +38,29 @@ class SmartListTest {
     }
 
     @Test
-    void getArray() {
+    void getSmallArray() {
         assertEquals('a', characterSmartList.get(0));
         assertEquals('b', characterSmartList.get(1));
         assertEquals('c', characterSmartList.get(2));
     }
 
     @Test
-    void setArray() {
+    void setOne() {
+        integerSmartList.add(0, 1);
+        integerSmartList.set(0, 5);
+        assertEquals(5, integerSmartList.get(0));
+    }
+
+    @Test
+    void setSmallArray() {
         assertEquals('a', characterSmartList.set(0, 'd'));
         assertEquals('d', characterSmartList.get(0));
+    }
+
+    @Test
+    void addOne() {
+        integerSmartList.add(0, 1);
+        assertEquals(1, integerSmartList.size());
+        assertEquals(1, integerSmartList.get(0));
     }
 }
