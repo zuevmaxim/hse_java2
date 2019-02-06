@@ -51,5 +51,22 @@ public class SmartList<E>  extends AbstractList<E> implements List<E> {
         return (E) ((ArrayList<Object>) data).get(index);
     }
 
+    @Override
+    public E set(int index, E element) throws IndexOutOfBoundsException {
+        if (index >= size || index < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (size == 1) {
+            E tmp = (E) data;
+            data = element;
+            return tmp;
+        }
+        if (size <= 5) {
+            E tmp = (E) (((Object[]) data)[index]);
+            ((Object[]) data)[index] = element;
+            return tmp;
+        }
+        return (E) ((ArrayList<Object>) data).set(index, element);
+    }
 
 }

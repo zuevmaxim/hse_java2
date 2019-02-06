@@ -43,4 +43,10 @@ class SmartListTest {
         assertEquals('b', characterSmartList.get(1));
         assertEquals('c', characterSmartList.get(2));
     }
+
+    @Test
+    void setArray() {
+        assertEquals('a', characterSmartList.set(0, 'd'));
+        assertEquals('d', characterSmartList.get(0));
+    }
 }
