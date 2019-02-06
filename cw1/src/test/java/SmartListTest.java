@@ -38,10 +38,32 @@ class SmartListTest {
     }
 
     @Test
+    void getOne() {
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        arrayList.add(1);
+
+        integerSmartList = new SmartList<>(arrayList);
+        assertEquals(1, integerSmartList.get(0));
+    }
+
+    @Test
     void getSmallArray() {
         assertEquals('a', characterSmartList.get(0));
         assertEquals('b', characterSmartList.get(1));
         assertEquals('c', characterSmartList.get(2));
+    }
+
+    @Test
+    void getBigArray() {
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            arrayList.add(i);
+        }
+
+        integerSmartList = new SmartList<>(arrayList);
+        for (int i = 0; i < 10; i++) {
+            assertEquals(i, integerSmartList.get(i));
+        }
     }
 
     @Test
@@ -58,9 +80,51 @@ class SmartListTest {
     }
 
     @Test
+    void setBigArray() {
+        ArrayList<Integer> arrayList = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            arrayList.add(i);
+        }
+
+        integerSmartList = new SmartList<>(arrayList);
+        for (int i = 0; i < 10; i++) {
+            assertEquals(i, integerSmartList.set(i, i + 10));
+        }
+        for (int i = 0; i < 10; i++) {
+            assertEquals(i + 10, integerSmartList.get(i));
+        }
+    }
+
+    @Test
     void addOne() {
         integerSmartList.add(0, 1);
         assertEquals(1, integerSmartList.size());
         assertEquals(1, integerSmartList.get(0));
+    }
+
+    @Test
+    void addTwo() {
+        integerSmartList.add(0, 5);
+        integerSmartList.add(1, 6);
+        assertEquals(2, integerSmartList.size());
+        assertEquals(5, integerSmartList.get(0));
+        assertEquals(6, integerSmartList.get(1));
+    }
+
+    @Test
+    void addSmallArray() {
+        integerSmartList.add(0, 5);
+        integerSmartList.add(1, 6);
+        integerSmartList.add(1, 7);
+        assertEquals(3, integerSmartList.size());
+        assertEquals(5, integerSmartList.get(0));
+        assertEquals(7, integerSmartList.get(1));
+        assertEquals(6, integerSmartList.get(2));
+    }
+
+    @Test
+    void removeEmptyException() {
+        assertThrows(IndexOutOfBoundsException.class,
+                () -> integerSmartList.remove(0));
     }
 }
