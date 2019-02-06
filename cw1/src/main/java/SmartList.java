@@ -114,6 +114,7 @@ public class SmartList<E>  extends AbstractList<E> implements List<E> {
                 ((ArrayList) data).add(((Object[])tmp)[i]);
             }
             ((ArrayList) data).add(index, element);
+            return;
         }
         size++;
         ((ArrayList) data).add(index, element);
@@ -144,7 +145,7 @@ public class SmartList<E>  extends AbstractList<E> implements List<E> {
         if (size <= 5) {
             var tmpData = (Object[]) data;
             var tmp = (E) tmpData[index];
-            for (int i = index; i < size - 2; ++i) {
+            for (int i = index; i < size - 1; ++i) {
                 tmpData[i] = tmpData[i + 1];
             }
             tmpData[size - 1] = null;

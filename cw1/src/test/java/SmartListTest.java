@@ -123,8 +123,39 @@ class SmartListTest {
     }
 
     @Test
+    void addBigArray() {
+        integerSmartList.add(0, 5);
+        integerSmartList.add(1, 7);
+        integerSmartList.add(1, 6);
+        integerSmartList.add(0, 4);
+        integerSmartList.add(0, 3);
+        integerSmartList.add(0, 2);
+        integerSmartList.add(0, 1);
+        assertEquals(7, integerSmartList.size());
+        for (int i = 0; i < integerSmartList.size(); i++) {
+            assertEquals(i + 1, integerSmartList.get(i));
+        }
+    }
+
+    @Test
     void removeEmptyException() {
         assertThrows(IndexOutOfBoundsException.class,
                 () -> integerSmartList.remove(0));
+    }
+
+    @Test
+    void removeBigArray() {
+        integerSmartList.add(0, 5);
+        integerSmartList.add(1, 7);
+        integerSmartList.add(1, 6);
+        integerSmartList.add(0, 4);
+        integerSmartList.add(0, 3);
+        integerSmartList.add(0, 2);
+        integerSmartList.add(0, 1);
+
+        for (int i = 0; i < 7; i++) {
+            assertEquals(i + 1, integerSmartList.remove(0));
+        }
+        assertEquals(0, integerSmartList.size());
     }
 }
