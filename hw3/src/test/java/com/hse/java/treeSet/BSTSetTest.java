@@ -12,7 +12,7 @@ class BSTSetTest {
     private static class Time {
         private final int hours;
         private final int minutes;
-        public Time(int hours, int minutes) {
+        private Time(int hours, int minutes) {
             this.hours = hours;
             this.minutes = minutes;
         }
@@ -36,8 +36,10 @@ class BSTSetTest {
 
     @Test
     void nonComparableTypeWithoutComparator() {
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         BSTSet<Time> timeSetWithoutComparator = new BSTSet<>();
         timeSetWithoutComparator.add(new Time(1, 1));
+        //noinspection ResultOfMethodCallIgnored
         assertThrows(ClassCastException.class, () -> timeSetWithoutComparator.contains(new Time(1, 1)));
     }
 
@@ -70,8 +72,11 @@ class BSTSetTest {
 
     @Test
     void sizeRepeatingElements() {
+        //noinspection OverwrittenKey
         bstSet.add(1);
+        //noinspection OverwrittenKey
         bstSet.add(1);
+        //noinspection OverwrittenKey
         bstSet.add(1);
         assertEquals(1, bstSet.size());
     }
@@ -92,6 +97,7 @@ class BSTSetTest {
 
     @Test
     void containsNullElement() {
+        //noinspection ResultOfMethodCallIgnored,ConstantConditions
         assertThrows(IllegalArgumentException.class, () -> bstSet.contains(null));
     }
 
@@ -150,6 +156,7 @@ class BSTSetTest {
 
     @Test
     void addNullElement() {
+        //noinspection ConstantConditions
         assertThrows(IllegalArgumentException.class, () -> bstSet.add(null));
     }
 
@@ -205,6 +212,7 @@ class BSTSetTest {
 
     @Test
     void removeNullElement() {
+        //noinspection ConstantConditions
         assertThrows(IllegalArgumentException.class, () -> bstSet.remove(null));
     }
 
@@ -372,6 +380,7 @@ class BSTSetTest {
 
     @Test
     void lowerNullElement() {
+        //noinspection ConstantConditions
         assertThrows(IllegalArgumentException.class, () -> bstSet.lower(null));
     }
 
@@ -400,6 +409,7 @@ class BSTSetTest {
 
     @Test
     void floorNullElement() {
+        //noinspection ConstantConditions
         assertThrows(IllegalArgumentException.class, () -> bstSet.floor(null));
     }
 
@@ -431,6 +441,7 @@ class BSTSetTest {
 
     @Test
     void ceilingNullElement() {
+        //noinspection ConstantConditions
         assertThrows(IllegalArgumentException.class, () -> bstSet.ceiling(null));
     }
 
@@ -462,6 +473,7 @@ class BSTSetTest {
 
     @Test
     void higherNullElement() {
+        //noinspection ConstantConditions
         assertThrows(IllegalArgumentException.class, () -> bstSet.higher(null));
     }
 
@@ -504,6 +516,7 @@ class BSTSetTest {
     void iteratorInvalidation() {
         var it = bstSet.iterator();
         bstSet.add(4);
+        //noinspection ResultOfMethodCallIgnored
         assertThrows(IllegalStateException.class, it::hasNext);
     }
 
@@ -529,6 +542,7 @@ class BSTSetTest {
         bstSet.add(3);
         var it = bstSet.descendingIterator();
         bstSet.add(4);
+        //noinspection ResultOfMethodCallIgnored
         assertThrows(IllegalStateException.class, it::hasNext);
     }
 

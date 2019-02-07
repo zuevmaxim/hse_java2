@@ -46,7 +46,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
          * @param element value to contain
          * @param parent node's parent in the tree
          */
-        public Node(@Nullable E element, @Nullable Node<E> parent) {
+        private Node(@Nullable E element, @Nullable Node<E> parent) {
             this.element = element;
             this.parent = parent;
             height = 1;
@@ -98,21 +98,30 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
                 tmp.right.parent = this;
             }
 
-            updateHeight();
-
             tmp.right = this;
-            parent = tmp;
-            tmp.updateHeight();
+            return updateParent(tmp);
+        }
 
-            if (tmp.parent != null) {
-                if (tmp.parent.left == this) {
-                    tmp.parent.left = tmp;
+        /**
+         * Set new parent for node and update it as a son for node.parent.
+         * Used in left/right rotations.
+         * @param node node to update parent
+         * @return node with updated links
+         */
+        private @NotNull Node<E> updateParent(@NotNull Node<E> node) {
+            parent = node;
+            updateHeight();
+            node.updateHeight();
+
+            if (node.parent != null) {
+                if (node.parent.left == this) {
+                    node.parent.left = node;
                 } else {
-                    tmp.parent.right = tmp;
+                    node.parent.right = node;
                 }
             }
 
-            return tmp;
+            return node;
         }
 
         /**
@@ -129,21 +138,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
                 tmp.left.parent = this;
             }
 
-            updateHeight();
-
             tmp.left = this;
-            parent = tmp;
-            tmp.updateHeight();
-
-            if (tmp.parent != null) {
-                if (tmp.parent.left == this) {
-                    tmp.parent.left = tmp;
-                } else {
-                    tmp.parent.right = tmp;
-                }
-            }
-
-            return tmp;
+            return updateParent(tmp);
         }
 
         /**
@@ -449,6 +445,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         Node<E> next = nextNode(currentNode);
+        //noinspection ConstantConditions
         currentNode.swapElements(next); // cannot be null as current node has right child
         return remove(next.element, next);
     }
@@ -694,7 +691,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
          * Construct iterator. Starts from the smallest element.
          * @param descendingIterator set if iterator should be descending.
          */
-        public TreeIterator(boolean descendingIterator) {
+        private TreeIterator(boolean descendingIterator) {
             startVersion = treeId.version;
             type = descendingIterator ^ descendingOrder;
             nextNode = descendingIterator ? lastNode() : firstNode();
