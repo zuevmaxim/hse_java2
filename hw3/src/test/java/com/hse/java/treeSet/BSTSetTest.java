@@ -519,7 +519,7 @@ class BSTSetTest {
             bstSet.add(i);
         }
         int i = N - 1;
-        for (var it = bstSet.descendingIterator(); it.hasNext();i--) {
+        for (var it = bstSet.descendingIterator(); it.hasNext(); i--) {
             assertEquals(i, it.next());
         }
     }

@@ -685,7 +685,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
         /**
          * Iterator type sets next direction.
-         * type = descendingIterator ^ descendingOrder, because this two characteristics are exchangeable.
+         * type = descendingIterator ^ descendingOrder,
+         * because this two characteristics are exchangeable.
          */
         private final boolean type;
 
@@ -705,7 +706,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
          */
         private void checkValidity() throws IllegalStateException {
             if (startVersion != treeId.version) {
-                throw new IllegalStateException("Iterator is invalid because set was modified.");
+                throw new IllegalStateException(
+                        "Iterator is invalid because set was modified.");
             }
         }
 
