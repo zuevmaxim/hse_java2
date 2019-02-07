@@ -223,6 +223,13 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
          */
         private final Comparator<? super E> comparator;
 
+        /**
+         * Tree version.
+         * Equals to the number of modifications that were made with this tree.
+         * Made for iterator invalidation.
+         */
+        private int version = 0;
+
         private TreeId(Comparator<? super E> comparator) {
             this.comparator = comparator;
         }
@@ -353,6 +360,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
             return false;
         }
         treeId.size++;
+        treeId.version++;
         setRoot(add(element, getRoot(), null));
         return true;
     }
@@ -457,6 +465,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
             return false;
         }
         treeId.size--;
+        treeId.version++;
         setRoot(remove((E) object, getRoot()));
         return true;
     }
@@ -668,28 +677,48 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      */
     private class TreeIterator implements Iterator<E> {
         private Node<E> nextNode;
+        /**
+         * Tree version when the iterator was constructed.
+         * Iterator is valid iff start version equals to current tree version.
+         */
+        private final int startVersion;
 
         /**
          * Construct iterator. Starts from the smallest element.
          */
         public TreeIterator() {
+            startVersion = treeId.version;
             nextNode = firstNode();
         }
 
         /**
+         * Check if iterator is valid.
+         * @throws IllegalStateException if set was modified.
+         */
+        private void checkValidity() throws IllegalStateException {
+            if (startVersion != treeId.version) {
+                throw new IllegalStateException("Iterator is invalid because set was modified.");
+            }
+        }
+
+        /**
          * Checks if there is next element in the set.
+         * @throws IllegalStateException if set was modified.
          */
         @Override
-        public boolean hasNext() {
+        public boolean hasNext() throws IllegalStateException {
+            checkValidity();
             return nextNode != null;
         }
 
         /**
          * Move iterator to the next element.
+         * @throws IllegalStateException if set was modified.
          * @return next element
          */
         @Override
-        public E next() {
+        public E next() throws IllegalStateException {
+            checkValidity();
             E next = nextNode.element;
             nextNode = nextNode(nextNode);
             return next;
@@ -702,28 +731,48 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      */
     private class TreeDescendingIterator implements Iterator<E> {
         private Node<E> nextNode;
+        /**
+         * Tree version when the iterator was constructed.
+         * Iterator is valid iff start version equals to current tree version.
+         */
+        private final int startVersion;
 
         /**
          * Construct iterator. Starts from the greatest element.
          */
         public TreeDescendingIterator() {
+            startVersion = treeId.version;
             nextNode = lastNode();
         }
 
         /**
+         * Check if iterator is valid.
+         * @throws IllegalStateException if set was modified.
+         */
+        private void checkValidity() throws IllegalStateException {
+            if (startVersion != treeId.version) {
+                throw new IllegalStateException("Iterator is invalid because set was modified.");
+            }
+        }
+
+        /**
          * Checks if there is next element in the set.
+         * @throws IllegalStateException if set was modified.
          */
         @Override
-        public boolean hasNext() {
+        public boolean hasNext() throws IllegalStateException {
+            checkValidity();
             return nextNode != null;
         }
 
         /**
          * Move iterator to the next element.
+         * @throws IllegalStateException if set was modified.
          * @return next element
          */
         @Override
-        public E next() {
+        public E next() throws IllegalStateException {
+            checkValidity();
             E next = nextNode.element;
             nextNode = previousNode(nextNode);
             return next;

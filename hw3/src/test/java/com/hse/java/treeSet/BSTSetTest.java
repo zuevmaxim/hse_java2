@@ -501,6 +501,13 @@ class BSTSetTest {
     }
 
     @Test
+    void iteratorInvalidation() {
+        var it = bstSet.iterator();
+        bstSet.add(4);
+        assertThrows(IllegalStateException.class, it::hasNext);
+    }
+
+    @Test
     void descendingIteratorEmpty() {
         var it = bstSet.descendingIterator();
         assertFalse(it.hasNext());
@@ -515,5 +522,13 @@ class BSTSetTest {
         for (var it = bstSet.descendingIterator(); it.hasNext();i--) {
             assertEquals(i, it.next());
         }
+    }
+
+    @Test
+    void descendingIteratorInvalidation() {
+        bstSet.add(3);
+        var it = bstSet.descendingIterator();
+        bstSet.add(4);
+        assertThrows(IllegalStateException.class, it::hasNext);
     }
 }
