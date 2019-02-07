@@ -8,5 +8,5 @@ env:
   - PROJECT_DIR=hw2
   - PROJECT_DIR=hw3
 
-script: cd $PROJECT_DIR %% mvn install
+script: cd $PROJECT_DIR && mvn install
 
