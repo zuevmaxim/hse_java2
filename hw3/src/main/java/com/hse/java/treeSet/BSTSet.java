@@ -476,7 +476,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @NotNull
     public Iterator<E> descendingIterator() {
-        return new TreeDescendingIterator();
+        return new TreeIterator(true);
     }
 
     /**
@@ -669,7 +669,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @NotNull
     public Iterator<E> iterator() {
-        return new TreeIterator();
+        return new TreeIterator(false);
     }
 
     /**
@@ -684,11 +684,19 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         private final int startVersion;
 
         /**
+         * Iterator type sets next direction.
+         * type = descendingIterator ^ descendingOrder, because this two characteristics are exchangeable.
+         */
+        private final boolean type;
+
+        /**
          * Construct iterator. Starts from the smallest element.
+         * @param descendingIterator set if iterator should be descending.
          */
-        public TreeIterator() {
+        public TreeIterator(boolean descendingIterator) {
             startVersion = treeId.version;
-            nextNode = firstNode();
+            type = descendingIterator ^ descendingOrder;
+            nextNode = descendingIterator ? lastNode() : firstNode();
         }
 
         /**
@@ -720,61 +728,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         public E next() throws IllegalStateException {
             checkValidity();
             E next = nextNode.element;
-            nextNode = nextNode(nextNode);
-            return next;
-        }
-    }
-
-    /**
-     * Tree iterator provides an ability to iterate
-     * in the BSTSet in a reverse order.
-     */
-    private class TreeDescendingIterator implements Iterator<E> {
-        private Node<E> nextNode;
-        /**
-         * Tree version when the iterator was constructed.
-         * Iterator is valid iff start version equals to current tree version.
-         */
-        private final int startVersion;
-
-        /**
-         * Construct iterator. Starts from the greatest element.
-         */
-        public TreeDescendingIterator() {
-            startVersion = treeId.version;
-            nextNode = lastNode();
-        }
-
-        /**
-         * Check if iterator is valid.
-         * @throws IllegalStateException if set was modified.
-         */
-        private void checkValidity() throws IllegalStateException {
-            if (startVersion != treeId.version) {
-                throw new IllegalStateException("Iterator is invalid because set was modified.");
-            }
-        }
-
-        /**
-         * Checks if there is next element in the set.
-         * @throws IllegalStateException if set was modified.
-         */
-        @Override
-        public boolean hasNext() throws IllegalStateException {
-            checkValidity();
-            return nextNode != null;
-        }
-
-        /**
-         * Move iterator to the next element.
-         * @throws IllegalStateException if set was modified.
-         * @return next element
-         */
-        @Override
-        public E next() throws IllegalStateException {
-            checkValidity();
-            E next = nextNode.element;
-            nextNode = previousNode(nextNode);
+            nextNode = type ? previousNode(nextNode) : nextNode(nextNode);
             return next;
         }
     }

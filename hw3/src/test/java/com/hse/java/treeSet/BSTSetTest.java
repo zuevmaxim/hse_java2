@@ -531,4 +531,33 @@ class BSTSetTest {
         bstSet.add(4);
         assertThrows(IllegalStateException.class, it::hasNext);
     }
+
+    @Test
+    void differentTypeIterators() {
+        var descendingSet = bstSet.descendingSet();
+        for (int i = 0; i < N; i++) {
+            bstSet.add(i);
+        }
+
+        var it00 = bstSet.iterator();
+        var it01 = bstSet.descendingIterator();
+        var it10 = descendingSet.iterator();
+        var it11 = descendingSet.descendingIterator();
+
+        for (int i = 0; i < 5; i++) {
+            assertEquals(i, it00.next());
+        }
+
+        for (int i = 0; i < 5; i++) {
+            assertEquals(N - 1 -i, it01.next());
+        }
+
+        for (int i = 0; i < 5; i++) {
+            assertEquals(N - 1 -i, it10.next());
+        }
+
+        for (int i = 0; i < 5; i++) {
+            assertEquals(i, it11.next());
+        }
+    }
 }
