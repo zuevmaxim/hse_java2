@@ -3,6 +3,8 @@ package com.hse.java.treeSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ConcurrentModificationException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BSTSetTest {
@@ -517,7 +519,7 @@ class BSTSetTest {
         var it = bstSet.iterator();
         bstSet.add(4);
         //noinspection ResultOfMethodCallIgnored
-        assertThrows(IllegalStateException.class, it::hasNext);
+        assertThrows(ConcurrentModificationException.class, it::hasNext);
     }
 
     @Test
@@ -543,7 +545,7 @@ class BSTSetTest {
         var it = bstSet.descendingIterator();
         bstSet.add(4);
         //noinspection ResultOfMethodCallIgnored
-        assertThrows(IllegalStateException.class, it::hasNext);
+        assertThrows(ConcurrentModificationException.class, it::hasNext);
     }
 
     @Test

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractSet;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 /**
@@ -699,32 +700,32 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
         /**
          * Check if iterator is valid.
-         * @throws IllegalStateException if set was modified.
+         * @throws ConcurrentModificationException if set was modified.
          */
-        private void checkValidity() throws IllegalStateException {
+        private void checkValidity() throws ConcurrentModificationException {
             if (startVersion != treeId.version) {
-                throw new IllegalStateException(
+                throw new ConcurrentModificationException(
                         "Iterator is invalid because set was modified.");
             }
         }
 
         /**
          * Checks if there is next element in the set.
-         * @throws IllegalStateException if set was modified.
+         * @throws ConcurrentModificationException if set was modified.
          */
         @Override
-        public boolean hasNext() throws IllegalStateException {
+        public boolean hasNext() throws ConcurrentModificationException {
             checkValidity();
             return nextNode != null;
         }
 
         /**
          * Move iterator to the next element.
-         * @throws IllegalStateException if set was modified.
+         * @throws ConcurrentModificationException if set was modified.
          * @return next element
          */
         @Override
-        public E next() throws IllegalStateException {
+        public E next() throws ConcurrentModificationException {
             checkValidity();
             E next = nextNode.element;
             nextNode = type ? previousNode(nextNode) : nextNode(nextNode);
