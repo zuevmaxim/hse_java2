@@ -39,7 +39,7 @@ class BSTSetTest {
     @Test
     void nonComparableTypeWithoutComparator() {
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-        BSTSet<Time> timeSetWithoutComparator = new BSTSet<>();
+        var timeSetWithoutComparator = new BSTSet<>();
         timeSetWithoutComparator.add(new Time(1, 1));
         //noinspection ResultOfMethodCallIgnored
         assertThrows(ClassCastException.class, () -> timeSetWithoutComparator.contains(new Time(1, 1)));
@@ -112,7 +112,7 @@ class BSTSetTest {
     @Test
     void containsExistingElements() {
         for (int i = 0; i < N; i++) {
-            bstSet.add(N -1 - i);
+            bstSet.add(N - 1 - i);
         }
         for (int i = 0; i < N; i++) {
             assertTrue(bstSet.contains(i));
@@ -501,6 +501,15 @@ class BSTSetTest {
     void iteratorEmpty() {
         var it = bstSet.iterator();
         assertFalse(it.hasNext());
+    }
+
+    @Test
+    void iteratorWithoutNextException() {
+        bstSet.add(1);
+        var it = bstSet.iterator();
+        it.next();
+        assertFalse(it.hasNext());
+        assertThrows(IllegalStateException.class, it::next);
     }
 
     @Test

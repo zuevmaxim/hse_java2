@@ -1,6 +1,5 @@
 package com.hse.java.treeSet;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,6 +7,7 @@ import java.util.AbstractSet;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.function.Function;
 
 /**
  * Realisation of set using balanced binary search tree.
@@ -25,12 +25,12 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         private E element;
         /**
          * Left child. All the elements in the left subtree
-         * are less then the element.
+         * are less than the element.
          */
         private Node<E> left;
         /**
          * Right child. All the elements in the right subtree
-         * are greater then the element.
+         * are greater than the element.
          */
         private Node<E> right;
         /**
@@ -40,7 +40,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         /**
          * Node's height from the bottom of the tree.
          */
-        private int height;
+        private int height = 1;
 
         /**
          * Constructs node with null left/right children.
@@ -50,7 +50,6 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         private Node(@Nullable E element, @Nullable Node<E> parent) {
             this.element = element;
             this.parent = parent;
-            height = 1;
         }
 
         /**
@@ -86,43 +85,29 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
 
         /**
+         * AVL left or right rotation.
+         * @param isRight true then right rotation happens and left otherwise
+         * @return the highest node after rotation
+         */
+        @NotNull
+        private Node<E> rotate(boolean isRight) {
+            Node<E> tmp = isRight ? left : right;
+            var tmpSon = isRight ? tmp.right : tmp.left;
+            changeSon(parent, this, tmp);
+            setSon(this, tmpSon, isRight);
+            setSon(tmp, this, !isRight);
+            updateHeight();
+            tmp.updateHeight();
+            return tmp;
+        }
+
+        /**
          * AVL right rotation.
          * @return the highest node after rotation
          */
         @NotNull
         private Node<E> rotateRight() {
-            Node<E> tmp = left;
-            tmp.parent = parent;
-
-            left = tmp.right;
-            if (tmp.right != null) {
-                tmp.right.parent = this;
-            }
-
-            tmp.right = this;
-            return updateParent(tmp);
-        }
-
-        /**
-         * Set new parent for node and update it as a son for node.parent.
-         * Used in left/right rotations.
-         * @param node node to update parent
-         * @return node with updated links
-         */
-        private @NotNull Node<E> updateParent(@NotNull Node<E> node) {
-            parent = node;
-            updateHeight();
-            node.updateHeight();
-
-            if (node.parent != null) {
-                if (node.parent.left == this) {
-                    node.parent.left = node;
-                } else {
-                    node.parent.right = node;
-                }
-            }
-
-            return node;
+            return rotate(true);
         }
 
         /**
@@ -131,16 +116,42 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
          */
         @NotNull
         private Node<E> rotateLeft() {
-            Node<E> tmp = right;
-            tmp.parent = parent;
+            return rotate(false);
+        }
 
-            right = tmp.left;
-            if (tmp.left != null) {
-                tmp.left.parent = this;
+        /**
+         * Set son to a node, and set node as a parent for the son.
+         * @param parent node to set son
+         * @param son new son
+         * @param isLeft true iff the son should be a left son
+         */
+        private static <T> void setSon(@Nullable Node<T> parent, @Nullable Node<T> son, boolean isLeft) {
+            if (parent != null) {
+                if (isLeft) {
+                    parent.left = son;
+                } else {
+                    parent.right = son;
+                }
             }
+            if (son != null) {
+                son.parent = parent;
+            }
+        }
 
-            tmp.left = this;
-            return updateParent(tmp);
+        /**
+         * Change son to a new one. Used if it is unknown either newSon is left or right.
+         * @param parent node to set new son
+         * @param currentSon old son
+         * @param newSon new son
+         */
+        private static <T> void changeSon(@Nullable Node<T> parent,
+                                          @Nullable Node<T> currentSon, @Nullable Node<T> newSon) {
+            if (parent != null) {
+                setSon(parent, newSon, parent.left == currentSon);
+            }
+            if (newSon != null) {
+                newSon.parent = parent;
+            }
         }
 
         /**
@@ -187,7 +198,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
         /**
          * Sequence of balancing up to the root.
-         * Needed after deletion
+         * Needed after deletion or adding.
          * @return the highest node after rotation(new root)
          */
         @NotNull
@@ -247,7 +258,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
     /**
      * Descending set copy.
-     * It is saved in order to update connection with it.
+     * It is saved in order to have only one descending copy.
+     * Helps avoid constructing new copies in descendingSet() method.
      */
     private BSTSet<E> descendingBSTSet;
     /**
@@ -260,8 +272,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      * If elements cannot be compared, ClassCastException can be thrown
      */
     public BSTSet() {
-        treeId = new TreeId<>((@NotNull E a, @NotNull E b) ->
-                ((Comparable<? super E>) a).compareTo(b));
+        treeId = new TreeId<>(null);
     }
 
     /**
@@ -275,11 +286,14 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     /**
      * Compare E elements using comparator if it is given.
      * Used for navigation in the tree.
-     * @return 0, if a == b, integer less then 0, if a < b,
-     *  integer greater then 0, if a > b
+     * @return 0, if a == b, integer less than 0, if a < b,
+     *  integer greater than 0, if a > b
      */
-    private int compare(@NotNull E a, @NotNull E b) {
-        return treeId.comparator.compare(a, b);
+    private int compare(@NotNull Object a, @NotNull E b) {
+        if (treeId.comparator != null) {
+            return treeId.comparator.compare((E) a, b);
+        }
+        return ((Comparable<? super E>) a).compareTo(b);
     }
 
     /**
@@ -287,32 +301,50 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      * It is different for descending copy
      */
     private int compareOrder(@NotNull E a, @NotNull E b) {
-        if (descendingOrder) {
-            return treeId.comparator.compare(b, a);
-        }
-        return treeId.comparator.compare(a, b);
+        return descendingOrder ? compare(b, a) : compare(a, b);
     }
 
     /**
-     * Checks if element is included into the subtree.
-     * @param element element to be checked for containment in the subtree
-     * @param currentNode root of the subtree
-     * @return true if this subtree contains the specified element
+     * Find node containing element equals to given one
+     * or null if there is no such element in the set.
+     * @param element value to find in the set
      */
-    private boolean contains(@NotNull E element, @NotNull Node<E> currentNode) {
-        int result = compare(element, currentNode.element);
-        if (result == 0) {
-            return true;
+    @Nullable
+    private Node<E> find(@NotNull Object element) {
+        var node = findNodeOrParent(element);
+        if (node != null && compare(element, node.element) == 0) {
+            return node;
         }
-        return result < 0
-                ? currentNode.left != null && contains(element, currentNode.left)
-                : currentNode.right != null && contains(element, currentNode.right);
+        return null;
+    }
+
+    /**
+     * Find node containing element or the place where to add such element.
+     * @param element element to find
+     */
+    @Nullable
+    private Node<E> findNodeOrParent(@NotNull Object element) {
+        var currentNode = getRoot();
+        Node<E> parent = null;
+        while (currentNode != null) {
+            parent = currentNode;
+            int result = compare(element, currentNode.element);
+            if (result == 0) {
+                return currentNode;
+            } else if (result < 0) {
+                currentNode = currentNode.left;
+            } else {
+                currentNode = currentNode.right;
+            }
+        }
+        return parent;
     }
 
     /**
      * Checks if element is included into the set.
      * @param object object to be checked for containment in this set
      * @throws ClassCastException if object cannot be cased to E
+     * or compared with elements correctly
      * @return true if this set contains the specified element
      */
     @Override
@@ -320,30 +352,23 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         if (getRoot() == null) {
             return false;
         }
-        return contains((E) object, getRoot());
+        return find(object) != null;
     }
 
     /**
-     * Add element to the subtree.
+     * Add element to the tree.
      * @param element element to add
-     * @param currentNode root of the subtree
-     * @param parent parent of currentNode
-     * @return new root of the subtree(could change after rotations)
+     * @return new root of the tree(could change after rotations)
      */
-    @Contract("_, null, _ -> new")
     @NotNull
-    private Node<E> add(@NotNull E element,
-                        @Nullable Node<E> currentNode, @Nullable Node<E> parent) {
-        if (currentNode == null) {
-            return new Node<>(element, parent);
+    private Node<E> addNode(@NotNull E element) {
+        var parent = findNodeOrParent(element);
+        var newNode = new Node<>(element, parent);
+        if (parent == null) {
+            return newNode;
         }
-        int result = compare(element, currentNode.element);
-        if (result < 0) {
-            currentNode.left = add(element, currentNode.left, currentNode);
-        } else {
-            currentNode.right = add(element, currentNode.right, currentNode);
-        }
-        return currentNode.balance();
+        Node.setSon(parent, newNode, compare(element, parent.element) < 0);
+        return newNode.cascadingBalance();
     }
 
     /**
@@ -358,7 +383,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         }
         treeId.size++;
         treeId.version++;
-        setRoot(add(element, getRoot(), null));
+        setRoot(addNode(element));
         return true;
     }
 
@@ -407,48 +432,25 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Remove element from the subtree.
-     * @param element element to remove
-     * @param currentNode root of the subtree
+     * Remove element from the set.
+     * @param currentNode node to remove
      * @return new root of the subtree
      */
     @Nullable
-    private Node<E> remove(@NotNull E element, @NotNull Node<E> currentNode) {
-        int result = compare(element, currentNode.element);
-        if (result < 0) {
-            return remove(element, currentNode.left);
-        }
-        if (result > 0) {
-            return remove(element, currentNode.right);
-        }
-        if (currentNode.left == null || currentNode.right == null) {
-            Node<E> son = null;
-            if (currentNode.left == null) {
-                son = currentNode.right;
-            }
-            if (currentNode.right == null) {
-                son = currentNode.left;
-            }
-            Node<E> currentNodeParent = currentNode.parent;
-            if (currentNodeParent != null) {
-                if (currentNodeParent.left == currentNode) {
-                    currentNodeParent.left = son;
-                } else {
-                    currentNodeParent.right = son;
-                }
-            }
-            if (son != null) {
-                son.parent = currentNodeParent;
-            }
-            return currentNodeParent == null
-                    ? son
-                    : currentNodeParent.cascadingBalance();
+    private Node<E> remove(@NotNull Node<E> currentNode) {
+        if (currentNode.left != null && currentNode.right != null) {
+            var next = nextNode(currentNode);
+            //noinspection ConstantConditions
+            currentNode.swapElements(next); // cannot be null as current node has right child
+            currentNode = next;
         }
 
-        Node<E> next = nextNode(currentNode);
-        //noinspection ConstantConditions
-        currentNode.swapElements(next); // cannot be null as current node has right child
-        return remove(next.element, next);
+        var son = currentNode.left == null ? currentNode.right : currentNode.left;
+        var currentNodeParent = currentNode.parent;
+        Node.changeSon(currentNodeParent, currentNode, son);
+        return currentNodeParent == null
+                ? son
+                : currentNodeParent.cascadingBalance();
     }
 
     /**
@@ -459,12 +461,13 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      */
     @Override
     public boolean remove(@NotNull Object object) throws ClassCastException {
-        if (!contains(object)) {
+        var node = find(object);
+        if (node == null) {
             return false;
         }
         treeId.size--;
         treeId.version++;
-        setRoot(remove((E) object, getRoot()));
+        setRoot(remove(node));
         return true;
     }
 
@@ -474,7 +477,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @NotNull
     public Iterator<E> descendingIterator() {
-        return new TreeIterator(true);
+        return descendingSet().iterator();
     }
 
     /**
@@ -493,24 +496,43 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the node containing the lowest element in the set
-     * or null if there is none.
+     * Find first/last node.
+     * @param isFirst is true if first node should be found
      */
     @Nullable
-    private Node<E> firstNode() {
+    private Node<E> limitNode(boolean isFirst) {
         Node<E> node = getRoot();
+        Function<Integer, Boolean> validDestination = (result) -> isFirst ? result > 0 : result < 0;
         while (node != null) {
-            if (node.left != null && compareOrder(node.element, node.left.element) > 0) {
+            if (node.left != null && validDestination.apply(compareOrder(node.element, node.left.element))) {
                 node = node.left;
                 continue;
             }
-            if (node.right != null && compareOrder(node.element, node.right.element) > 0) {
+            if (node.right != null && validDestination.apply(compareOrder(node.element, node.right.element))) {
                 node = node.right;
                 continue;
             }
             return node;
         }
         return null;
+    }
+
+    /**
+     * Find the node containing the lowest element in the set
+     * or null if there is none.
+     */
+    @Nullable
+    private Node<E> firstNode() {
+        return limitNode(true);
+    }
+
+    /**
+     * Find the node containing the lowest element in the set
+     * or null if there is none.
+     */
+    @Nullable
+    private Node<E> lastNode() {
+        return limitNode(false);
     }
 
     /**
@@ -542,32 +564,11 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the node containing the lowest element in the set
-     * or null if there is none.
-     */
-    @Nullable
-    private Node<E>  lastNode() {
-        Node<E> node = getRoot();
-        while (node != null) {
-            if (node.left != null && compareOrder(node.element, node.left.element) < 0) {
-                node = node.left;
-                continue;
-            }
-            if (node.right != null && compareOrder(node.element, node.right.element) < 0) {
-                node = node.right;
-                continue;
-            }
-            return node;
-        }
-        return null;
-    }
-
-    /**
      * Type of comparator.
      * GE (>=) greater or equal
-     * GT (>)  greater then
+     * GT (>)  greater than
      * LE (<=) less or equal
-     * LT (<)  less then
+     * LT (<)  less than
      */
     private enum CompareType { GE, GT, LE, LT }
 
@@ -577,10 +578,10 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      * @param currentNode root of the subtree
      * @param bound node to save bound
      * @param compareType which bound to find :
-     *                    GE - smallest element greater or equal then given one
-     *                    GT - smallest element greater then given one
-     *                    LE - greatest element less or equal then given one
-     *                    LT - greatest element less then given one
+     *                    GE - smallest element greater or equal than given one
+     *                    GT - smallest element greater than given one
+     *                    LE - greatest element less or equal than given one
+     *                    LT - greatest element less than given one
      */
     private void boundedFind(@NotNull E element, @Nullable Node<E> currentNode,
                              @NotNull Node<E> bound, @NotNull CompareType compareType) {
@@ -610,7 +611,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the greatest element less then given one.
+     * Find the greatest element less than given one.
      * @param e element to find bound
      * @return bound or null if none
      */
@@ -623,7 +624,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the greatest element less or equal then given one.
+     * Find the greatest element less or equal than given one.
      * @param e element to find bound
      * @return bound or null if none
      */
@@ -636,7 +637,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the smallest element greater or equal then given one.
+     * Find the smallest element greater or equal than given one.
      * @param e element to find bound
      * @return bound or null if none
      */
@@ -649,7 +650,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     }
 
     /**
-     * Find the smallest element greater then given one.
+     * Find the smallest element greater than given one.
      * @param e element to find bound
      * @return bound or null if none
      */
@@ -667,7 +668,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @NotNull
     public Iterator<E> iterator() {
-        return new TreeIterator(false);
+        return new TreeIterator();
     }
 
     /**
@@ -682,20 +683,11 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         private final int startVersion;
 
         /**
-         * Iterator type sets next direction.
-         * type = descendingIterator ^ descendingOrder,
-         * because this two characteristics are exchangeable.
-         */
-        private final boolean type;
-
-        /**
          * Construct iterator. Starts from the smallest element.
-         * @param descendingIterator set if iterator should be descending.
          */
-        private TreeIterator(boolean descendingIterator) {
+        private TreeIterator() {
             startVersion = treeId.version;
-            type = descendingIterator ^ descendingOrder;
-            nextNode = descendingIterator ? lastNode() : firstNode();
+            nextNode = firstNode();
         }
 
         /**
@@ -722,13 +714,17 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         /**
          * Move iterator to the next element.
          * @throws ConcurrentModificationException if set was modified.
+         * @throws IllegalStateException if hasNext() == false
          * @return next element
          */
         @Override
-        public E next() throws ConcurrentModificationException {
+        public E next() throws ConcurrentModificationException, IllegalStateException {
             checkValidity();
+            if (!hasNext()) {
+                throw new IllegalStateException("Next element is null.");
+            }
             E next = nextNode.element;
-            nextNode = type ? previousNode(nextNode) : nextNode(nextNode);
+            nextNode = descendingOrder ? previousNode(nextNode) : nextNode(nextNode);
             return next;
         }
     }
