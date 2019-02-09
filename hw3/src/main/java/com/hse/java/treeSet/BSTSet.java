@@ -47,10 +47,12 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
          * @param element value to contain
          * @param parent node's parent in the tree
          */
-        private Node(@Nullable E element, @Nullable Node<E> parent) {
+        private Node(@NotNull E element, @Nullable Node<E> parent) {
             this.element = element;
             this.parent = parent;
         }
+
+        private Node() { }
 
         /**
          * Swap element fields in this and other nodes.
@@ -289,6 +291,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
      * @return 0, if a == b, integer less than 0, if a < b,
      *  integer greater than 0, if a > b
      */
+    @SuppressWarnings("unchecked")
     private int compare(@NotNull Object a, @NotNull E b) {
         if (treeId.comparator != null) {
             return treeId.comparator.compare((E) a, b);
@@ -618,7 +621,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @Nullable
     public E lower(@NotNull E e) {
-        Node<E> result = new Node<>(null, null);
+        Node<E> result = new Node<>();
         boundedFind(e, getRoot(), result, CompareType.LT);
         return result.element;
     }
@@ -631,7 +634,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @Nullable
     public E floor(@NotNull E e) {
-        Node<E> result = new Node<>(null, null);
+        Node<E> result = new Node<>();
         boundedFind(e, getRoot(), result, CompareType.LE);
         return result.element;
     }
@@ -644,7 +647,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @Nullable
     public E ceiling(@NotNull E e) {
-        Node<E> result = new Node<>(null, null);
+        Node<E> result = new Node<>();
         boundedFind(e, getRoot(), result, CompareType.GE);
         return result.element;
     }
@@ -657,7 +660,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @Nullable
     public E higher(@NotNull E e) {
-        Node<E> result = new Node<>(null, null);
+        Node<E> result = new Node<>();
         boundedFind(e, getRoot(), result, CompareType.GT);
         return result.element;
     }
