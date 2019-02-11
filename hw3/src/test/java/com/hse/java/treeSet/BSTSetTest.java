@@ -3,6 +3,7 @@ package com.hse.java.treeSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,19 +22,21 @@ class BSTSetTest {
     }
 
     private BSTSet<Time> timeBSTSet;
+    private final Comparator<Time> timeComparator = (Time a, Time b) -> {
+        if (a.hours == b.hours) {
+            if (a.minutes == b.minutes) {
+                return 0;
+            }
+            return a.minutes < b.minutes ? -1 : 1;
+        }
+        return a.hours < b.hours ? -1 : 1;
+    };
+
 
     @BeforeEach
     void setUp() {
         bstSet = new BSTSet<>();
-        timeBSTSet = new BSTSet<>((Time a, Time b) -> {
-            if (a.hours == b.hours) {
-                if (a.minutes == b.minutes) {
-                    return 0;
-                }
-                return a.minutes < b.minutes ? -1 : 1;
-            }
-            return a.hours < b.hours ? -1 : 1;
-        });
+        timeBSTSet = new BSTSet<>(timeComparator);
     }
 
     @Test
@@ -138,6 +141,29 @@ class BSTSetTest {
         assertFalse(bstSet.contains(3));
         assertFalse(bstSet.contains(5));
 
+    }
+
+    @SuppressWarnings("SuspiciousMethodCalls")
+    @Test
+    void containsSuperObject() {
+        class FormatTime extends Time {
+            @SuppressWarnings("unused")
+            private boolean format;
+            private FormatTime(int hours, int minutes) {
+                super(hours, minutes);
+            }
+            private FormatTime(int hours, int minutes, boolean format) {
+                this(hours, minutes);
+                this.format = format;
+            }
+        }
+
+        BSTSet<FormatTime> formatTimeBSTSet = new BSTSet<>(timeComparator);
+        formatTimeBSTSet.add(new FormatTime(12, 0, true));
+        formatTimeBSTSet.add(new FormatTime(14, 15, false));
+
+        assertTrue(formatTimeBSTSet.contains(new Time(12, 0)));
+        assertTrue(formatTimeBSTSet.contains(new Time(14, 15)));
     }
 
     @Test

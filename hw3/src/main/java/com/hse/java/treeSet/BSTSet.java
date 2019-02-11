@@ -150,9 +150,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
                                           @Nullable Node<T> currentSon, @Nullable Node<T> newSon) {
             if (parent != null) {
                 setSon(parent, newSon, parent.left == currentSon);
-            }
-            if (newSon != null) {
-                newSon.parent = parent;
+            } else if (newSon != null) {
+                newSon.parent = null;
             }
         }
 
@@ -334,11 +333,8 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
             int result = compare(element, currentNode.element);
             if (result == 0) {
                 return currentNode;
-            } else if (result < 0) {
-                currentNode = currentNode.left;
-            } else {
-                currentNode = currentNode.right;
             }
+            currentNode = result < 0 ? currentNode.left : currentNode.right;
         }
         return parent;
     }
