@@ -614,7 +614,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @Nullable
     public E lower(@NotNull E e) {
-        Node<E> result = new Node<>();
+        var result = new Node<E>();
         boundedFind(e, getRoot(), result, CompareType.LT);
         return result.element;
     }
@@ -627,7 +627,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @Nullable
     public E floor(@NotNull E e) {
-        Node<E> result = new Node<>();
+        var result = new Node<E>();
         boundedFind(e, getRoot(), result, CompareType.LE);
         return result.element;
     }
@@ -640,7 +640,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @Nullable
     public E ceiling(@NotNull E e) {
-        Node<E> result = new Node<>();
+        var result = new Node<E>();
         boundedFind(e, getRoot(), result, CompareType.GE);
         return result.element;
     }
@@ -653,7 +653,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
     @Override
     @Nullable
     public E higher(@NotNull E e) {
-        Node<E> result = new Node<>();
+        var result = new Node<E>();
         boundedFind(e, getRoot(), result, CompareType.GT);
         return result.element;
     }

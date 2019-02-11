@@ -43,7 +43,7 @@ class BSTSetTest {
     @Test
     void nonComparableTypeWithoutComparator() {
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-        var timeSetWithoutComparator = new BSTSet<>();
+        var timeSetWithoutComparator = new BSTSet<Time>();
         timeSetWithoutComparator.add(new Time(1, 1));
         //noinspection ResultOfMethodCallIgnored
         assertThrows(ClassCastException.class, () -> timeSetWithoutComparator.contains(new Time(1, 1)));
@@ -159,7 +159,7 @@ class BSTSetTest {
             }
         }
 
-        BSTSet<FormatTime> formatTimeBSTSet = new BSTSet<>(timeComparator);
+        var formatTimeBSTSet = new BSTSet<FormatTime>(timeComparator);
         formatTimeBSTSet.add(new FormatTime(12, 0, true));
         formatTimeBSTSet.add(new FormatTime(14, 15, false));
 
