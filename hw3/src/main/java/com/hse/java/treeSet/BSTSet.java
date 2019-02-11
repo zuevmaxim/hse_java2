@@ -3,10 +3,7 @@ package com.hse.java.treeSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.AbstractSet;
-import java.util.Comparator;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -214,7 +211,7 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
 
     /**
      * Storage for tree's root, comparator and size.
-     * Made in oder to avoid updating connection with
+     * Made in order to avoid updating connection with
      * descending copy - it will be done automatically;
      * @param <E> node type that tree contains
      */
@@ -713,14 +710,14 @@ public class BSTSet<E> extends AbstractSet<E> implements MyTreeSet<E> {
         /**
          * Move iterator to the next element.
          * @throws ConcurrentModificationException if set was modified.
-         * @throws IllegalStateException if hasNext() == false
+         * @throws NoSuchElementException if hasNext() == false
          * @return next element
          */
         @Override
-        public E next() throws ConcurrentModificationException, IllegalStateException {
+        public E next() throws ConcurrentModificationException, NoSuchElementException {
             checkValidity();
             if (!hasNext()) {
-                throw new IllegalStateException("Next element is null.");
+                throw new NoSuchElementException("Next element is null.");
             }
             E next = nextNode.element;
             nextNode = descendingOrder ? previousNode(nextNode) : nextNode(nextNode);

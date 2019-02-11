@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -535,7 +536,7 @@ class BSTSetTest {
         var it = bstSet.iterator();
         it.next();
         assertFalse(it.hasNext());
-        assertThrows(IllegalStateException.class, it::next);
+        assertThrows(NoSuchElementException.class, it::next);
     }
 
     @Test
