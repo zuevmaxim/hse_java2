@@ -84,4 +84,17 @@ class PhoneBookTest {
         assertEquals(new ArrayList<>(Collections.singletonList("4")), phoneBook.findByName("Jack"));
         assertEquals(new ArrayList<>(Collections.singletonList("John")), phoneBook.findByPhone("1"));
     }
+
+    @Test
+    void allPairs() throws SQLException {
+        phoneBook.add("Jack", "1");
+        phoneBook.add("John", "1");
+        phoneBook.add("Mike", "2");
+        phoneBook.add("John", "3");
+        assertEquals(new ArrayList<>(Arrays.asList(
+                new PhoneBook.Pair<>("Jack", "1"),
+                new PhoneBook.Pair<>("John", "1"),
+                new PhoneBook.Pair<>("Mike", "2"),
+                new PhoneBook.Pair<>("John", "3"))), phoneBook.allPairs());
+    }
 }

@@ -54,6 +54,13 @@ public class Main {
                     String phone = in.next();
                     String newPhone = in.next();
                     phoneBook.setName(name, phone, newPhone);
+                } else if (command == 7) {
+                    var pairs = phoneBook.allPairs();
+                    for (var pair : pairs) {
+                        System.out.print(pair.getFirst());
+                        System.out.print(' ');
+                        System.out.println(pair.getSecond());
+                    }
                 }
             } catch (SQLException e) {
                 System.out.println(e.getMessage());

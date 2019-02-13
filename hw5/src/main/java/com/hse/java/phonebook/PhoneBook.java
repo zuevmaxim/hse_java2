@@ -2,6 +2,7 @@ package com.hse.java.phonebook;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class PhoneBook {
     private final String dataBase;
@@ -76,6 +77,45 @@ public class PhoneBook {
                 statement.executeUpdate(
                         "update phones set Phone = '" + newPhone +
                                 "' where Holder = '" + holder + "' and Phone = '" + phone + "'");
+            }
+        }
+    }
+
+    public static class Pair<F, S> {
+        private F first;
+        private S second;
+
+        public Pair(F first, S second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        public F getFirst() {
+            return first;
+        }
+
+        public S getSecond() {
+            return second;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Pair) {
+                return first.equals(((Pair) obj).first) && second.equals(((Pair) obj).second);
+            }
+            return false;
+        }
+    }
+
+    public ArrayList<Pair<String, String>> allPairs() throws SQLException {
+        try(Connection connection = DriverManager.getConnection(dataBase)) {
+            try (var statement = connection.createStatement()) {
+                ResultSet resultSet = statement.executeQuery("select * from phones");
+                var list = new ArrayList<Pair<String, String>>();
+                while (resultSet.next()) {
+                    list.add(new Pair<>(resultSet.getString("Holder"), resultSet.getString("Phone")));
+                }
+                return list;
             }
         }
     }
