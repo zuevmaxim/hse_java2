@@ -44,10 +44,19 @@ public class Main {
                     String name = in.next();
                     String phone = in.next();
                     phoneBook.remove(name, phone);
+                } else if (command == 5) {
+                    String name = in.next();
+                    String phone = in.next();
+                    String newName = in.next();
+                    phoneBook.setName(name, phone, newName);
+                } else if (command == 6) {
+                    String name = in.next();
+                    String phone = in.next();
+                    String newPhone = in.next();
+                    phoneBook.setName(name, phone, newPhone);
                 }
             } catch (SQLException e) {
                 System.out.println(e.getMessage());
-                System.out.println(e.getCause().getMessage());
                 return;
             }
         }

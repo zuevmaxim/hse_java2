@@ -40,7 +40,8 @@ public class PhoneBook {
     public ArrayList<String> findByPhone(String phone) throws SQLException {
         try(Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
-                ResultSet resultSet = statement.executeQuery("select Holder from phones where Phone = '" + phone + "'");
+                ResultSet resultSet = statement.executeQuery(
+                        "select Holder from phones where Phone = '" + phone + "'");
                 var list = new ArrayList<String>();
                 while (resultSet.next()) {
                     list.add(resultSet.getString("Holder"));
@@ -53,7 +54,28 @@ public class PhoneBook {
     public void remove(String holder, String phone) throws SQLException {
         try(Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
-                statement.executeUpdate("delete from phones where Holder = '" + holder + "' and Phone = '" + phone + "'");
+                statement.executeUpdate(
+                        "delete from phones where Holder = '" + holder + "' and Phone = '" + phone + "'");
+            }
+        }
+    }
+
+    public void setName(String holder, String phone, String newName) throws SQLException {
+        try(Connection connection = DriverManager.getConnection(dataBase)) {
+            try (var statement = connection.createStatement()) {
+                statement.executeUpdate(
+                        "update phones set Holder = '" + newName +
+                                "' where Holder = '" + holder + "' and Phone = '" + phone + "'");
+            }
+        }
+    }
+
+    public void setPhone(String holder, String phone, String newPhone) throws SQLException {
+        try(Connection connection = DriverManager.getConnection(dataBase)) {
+            try (var statement = connection.createStatement()) {
+                statement.executeUpdate(
+                        "update phones set Phone = '" + newPhone +
+                                "' where Holder = '" + holder + "' and Phone = '" + phone + "'");
             }
         }
     }

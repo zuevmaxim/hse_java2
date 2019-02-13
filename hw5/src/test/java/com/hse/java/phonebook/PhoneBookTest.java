@@ -62,4 +62,26 @@ class PhoneBookTest {
         assertEquals(new ArrayList<>(Collections.singletonList("Jack")), phoneBook.findByPhone("1"));
         assertEquals(new ArrayList<>(Collections.singletonList("Mike")), phoneBook.findByPhone("2"));
     }
+
+    @Test
+    void setName() throws SQLException {
+        phoneBook.add("Jack", "1");
+        phoneBook.add("John", "1");
+        phoneBook.add("Mike", "2");
+        phoneBook.add("John", "3");
+        phoneBook.setName("Jack", "1", "Tom");
+        assertEquals(new ArrayList<>(Collections.singletonList("1")), phoneBook.findByName("Tom"));
+        assertEquals(new ArrayList<String>(), phoneBook.findByName("Jack"));
+    }
+
+    @Test
+    void setPhone() throws SQLException {
+        phoneBook.add("Jack", "1");
+        phoneBook.add("John", "1");
+        phoneBook.add("Mike", "2");
+        phoneBook.add("John", "3");
+        phoneBook.setPhone("Jack", "1", "4");
+        assertEquals(new ArrayList<>(Collections.singletonList("4")), phoneBook.findByName("Jack"));
+        assertEquals(new ArrayList<>(Collections.singletonList("John")), phoneBook.findByPhone("1"));
+    }
 }
