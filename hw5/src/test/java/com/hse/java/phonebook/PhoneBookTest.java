@@ -91,10 +91,10 @@ class PhoneBookTest {
         phoneBook.add("John", "1");
         phoneBook.add("Mike", "2");
         phoneBook.add("John", "3");
-        assertEquals(new ArrayList<>(Arrays.asList(
-                new PhoneBook.Pair<>("Jack", "1"),
-                new PhoneBook.Pair<>("John", "1"),
-                new PhoneBook.Pair<>("Mike", "2"),
-                new PhoneBook.Pair<>("John", "3"))), phoneBook.allPairs());
+        assertEquals(new ArrayList<Pair>(Arrays.asList(
+                new Pair<>("Jack", "1"),
+                new Pair<>("John", "1"),
+                new Pair<>("Mike", "2"),
+                new Pair<>("John", "3"))), phoneBook.allPairs());
     }
 }
