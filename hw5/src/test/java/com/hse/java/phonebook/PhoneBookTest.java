@@ -19,13 +19,13 @@ class PhoneBookTest {
     }
 
     @Test
-    void add() throws SQLException {
+    void add() throws SQLException, PhoneBook.NoSuchRecordException {
         phoneBook.add("Jack", "1");
         assertEquals(new ArrayList<>(Collections.singletonList("1")), phoneBook.findByName("Jack"));
     }
 
     @Test
-    void findByName() throws SQLException {
+    void findByName() throws SQLException, PhoneBook.NoSuchRecordException {
         phoneBook.add("Jack", "1");
         phoneBook.add("John", "1");
         phoneBook.add("Mike", "2");
@@ -36,7 +36,7 @@ class PhoneBookTest {
     }
 
     @Test
-    void findByPhone() throws SQLException {
+    void findByPhone() throws SQLException, PhoneBook.NoSuchRecordException {
         phoneBook.add("Jack", "1");
         phoneBook.add("John", "1");
         phoneBook.add("Mike", "2");
@@ -48,12 +48,13 @@ class PhoneBookTest {
     }
 
     @Test
-    void remove() throws SQLException {
+    void remove() throws SQLException, PhoneBook.NoSuchRecordException {
         phoneBook.add("Jack", "1");
         phoneBook.add("John", "1");
         phoneBook.add("Mike", "2");
 
         phoneBook.remove("John", "1");
+        assertThrows(PhoneBook.NoSuchRecordException.class, () -> phoneBook.remove("Max", "1"));
 
         assertEquals(new ArrayList<>(Collections.singletonList("1")), phoneBook.findByName("Jack"));
         assertEquals(new ArrayList<String>(), phoneBook.findByName("John"));
@@ -64,7 +65,7 @@ class PhoneBookTest {
     }
 
     @Test
-    void setName() throws SQLException {
+    void setName() throws SQLException, PhoneBook.NoSuchRecordException {
         phoneBook.add("Jack", "1");
         phoneBook.add("John", "1");
         phoneBook.add("Mike", "2");
@@ -75,7 +76,7 @@ class PhoneBookTest {
     }
 
     @Test
-    void setPhone() throws SQLException {
+    void setPhone() throws SQLException, PhoneBook.NoSuchRecordException {
         phoneBook.add("Jack", "1");
         phoneBook.add("John", "1");
         phoneBook.add("Mike", "2");
@@ -90,6 +91,7 @@ class PhoneBookTest {
         phoneBook.add("Jack", "1");
         phoneBook.add("John", "1");
         phoneBook.add("Mike", "2");
+        phoneBook.add("John", "3");
         phoneBook.add("John", "3");
         assertEquals(new ArrayList<Pair>(Arrays.asList(
                 new Pair<>("Jack", "1"),
