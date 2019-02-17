@@ -3,25 +3,26 @@ package com.hse.java.phonebook;
 import java.sql.SQLException;
 import java.util.Scanner;
 
+/**
+ * Class for user interface.
+ */
 public class Main {
+    /**
+     * Main function for command line interface.
+     */
     public static void main(String[] args) {
         var in = new Scanner(System.in);
         try {
             var phoneBook = new PhoneBook();
             while (true) {
                 System.out.print("Enter command: ");
-                if (!in.hasNextInt()) {
-                    System.out.println("Enter command from 0 to 7.");
-                    in.next();
-                    continue;
-                }
-                int command = in.nextInt();
+                String command = in.next();
                 try {
                     switch (command) {
-                        case 0: {
+                        case "0": {
                             return;
                         }
-                        case 1: {
+                        case "1": {
                             System.out.print("Enter name: ");
                             String name = in.next();
                             System.out.print("Enter phone: ");
@@ -29,21 +30,21 @@ public class Main {
                             phoneBook.add(name, phone);
                             break;
                         }
-                        case 2: {
+                        case "2": {
                             System.out.print("Enter name: ");
                             String name = in.next();
                             var phoneList = phoneBook.findByName(name);
                             System.out.println(phoneList);
                             break;
                         }
-                        case 3: {
+                        case "3": {
                             System.out.print("Enter phone: ");
                             String phone = in.next();
                             var nameList = phoneBook.findByPhone(phone);
                             System.out.println(nameList);
                             break;
                         }
-                        case 4: {
+                        case "4": {
                             System.out.print("Enter name: ");
                             String name = in.next();
                             System.out.print("Enter phone: ");
@@ -51,7 +52,7 @@ public class Main {
                             phoneBook.remove(name, phone);
                             break;
                         }
-                        case 5: {
+                        case "5": {
                             System.out.print("Enter name: ");
                             String name = in.next();
                             System.out.print("Enter phone: ");
@@ -61,17 +62,17 @@ public class Main {
                             phoneBook.setName(name, phone, newName);
                             break;
                         }
-                        case 6: {
+                        case "6": {
                             System.out.print("Enter name: ");
                             String name = in.next();
                             System.out.print("Enter phone: ");
                             String phone = in.next();
                             System.out.print("Enter new phone: ");
                             String newPhone = in.next();
-                            phoneBook.setName(name, phone, newPhone);
+                            phoneBook.setPhone(name, phone, newPhone);
                             break;
                         }
-                        case 7: {
+                        case "7": {
                             var pairs = phoneBook.allPairs();
                             for (var pair : pairs) {
                                 System.out.print(pair.getFirst());
