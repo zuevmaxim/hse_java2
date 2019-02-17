@@ -37,26 +37,26 @@ public class PhoneBook {
     public PhoneBook() throws SQLException {
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
-                statement.executeUpdate("drop table if exists persons");
+                statement.executeUpdate("DROP TABLE IF EXISTS persons");
                 statement.executeUpdate(
-                        "create table persons ("
-                        + "id integer PRIMARY KEY AUTOINCREMENT ,"
-                        + "name varchar NOT NULL ,"
-                        + "unique (name))");
-                statement.executeUpdate("drop table if exists phones");
+                        "CREATE TABLE persons ("
+                        + "id INTEGER PRIMARY KEY AUTOINCREMENT ,"
+                        + "name VARCHAR NOT NULL ,"
+                        + "UNIQUE (name))");
+                statement.executeUpdate("DROP TABLE IF EXISTS phones");
                 statement.executeUpdate(
-                        "create table phones ("
-                        + "id integer PRIMARY KEY AUTOINCREMENT ,"
-                        + "phone varchar NOT NULL ,"
-                        + "unique (phone))");
-                statement.executeUpdate("drop table if exists phonebook");
+                        "CREATE TABLE phones ("
+                        + "id INTEGER PRIMARY KEY AUTOINCREMENT ,"
+                        + "phone VARCHAR NOT NULL ,"
+                        + "UNIQUE (phone))");
+                statement.executeUpdate("DROP TABLE IF EXISTS phonebook");
                 statement.executeUpdate(
-                        "create table phonebook ("
-                        + "personId integer NOT NULL ,"
-                        + "phoneId integer NOT NULL ,"
-                        + "unique (personId, phoneId) on conflict ignore,"
-                        + "foreign key (personId) references persons(id),"
-                        + "foreign key (phoneId) references phones(id))");
+                        "CREATE TABLE phonebook ("
+                        + "personId INTEGER NOT NULL ,"
+                        + "phoneId INTEGER NOT NULL ,"
+                        + "UNIQUE (personId, phoneId) ON CONFLICT IGNORE ,"
+                        + "FOREIGN KEY (personId) REFERENCES persons(id),"
+                        + "FOREIGN KEY (phoneId) REFERENCES phones(id))");
             }
         }
     }
@@ -73,8 +73,8 @@ public class PhoneBook {
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
-                        "select id from persons "
-                        + "where name = '" + name + "'");
+                        "SELECT id FROM persons "
+                        + "WHERE name = '" + name + "'");
                 if (!resultSet.next()) {
                     throw new NoSuchRecordException(
                             "There is no person with such name: " + name);
@@ -96,8 +96,8 @@ public class PhoneBook {
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
-                        "select id from phones "
-                        + "where phone = '" + phone + "'");
+                        "SELECT id FROM phones "
+                        + "WHERE phone = '" + phone + "'");
                 if (!resultSet.next()) {
                     throw new NoSuchRecordException("There is no such phone: " + phone);
                 }
@@ -117,12 +117,14 @@ public class PhoneBook {
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
                 statement.executeUpdate(
-                        "insert or ignore into persons (name) values ('" + name + "')");
+                        "INSERT OR IGNORE INTO persons (name) "
+                                + "VALUES ('" + name + "')");
                 statement.executeUpdate(
-                        "insert or ignore into phones (phone) values ('" + phone + "')");
+                        "INSERT OR IGNORE INTO phones (phone) "
+                                + "VALUES ('" + phone + "')");
                 statement.executeUpdate(
-                        "insert into phonebook (personId, phoneId) "
-                                + "values ('" + getPersonId(name) + "', '"
+                        "INSERT INTO phonebook (personId, phoneId) "
+                                + "VALUES ('" + getPersonId(name) + "', '"
                                 + getPhoneId(phone) + "')");
             } catch (NoSuchRecordException e) {
                 assert false;
@@ -143,9 +145,9 @@ public class PhoneBook {
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
-                        "select phones.phone from phones, phonebook "
-                            + "where phones.id = phonebook.phoneId "
-                            + "and phonebook.personId = '" + getPersonId(name) + "'");
+                        "SELECT phones.phone FROM phones, phonebook "
+                            + "WHERE phones.id = phonebook.phoneId "
+                            + "AND phonebook.personId = '" + getPersonId(name) + "'");
                 var list = new ArrayList<String>();
                 while (resultSet.next()) {
                     list.add(resultSet.getString("phone"));
@@ -168,9 +170,9 @@ public class PhoneBook {
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
-                        "select persons.name from persons, phonebook "
-                                + "where persons.id = phonebook.personId "
-                                + "and phonebook.phoneId = '" + getPhoneId(phone) + "'");
+                        "SELECT persons.name FROM persons, phonebook "
+                                + "WHERE persons.id = phonebook.personId "
+                                + "AND phonebook.phoneId = '" + getPhoneId(phone) + "'");
                 var list = new ArrayList<String>();
                 while (resultSet.next()) {
                     list.add(resultSet.getString("name"));
@@ -192,8 +194,8 @@ public class PhoneBook {
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
                 statement.executeUpdate(
-                        "delete from phonebook where personId = '" + getPersonId(name)
-                                + "' and phoneId = '" + getPhoneId(phone) + "'");
+                        "DELETE FROM phonebook WHERE personId = '" + getPersonId(name)
+                                + "' AND phoneId = '" + getPhoneId(phone) + "'");
             }
         }
     }
@@ -214,11 +216,12 @@ public class PhoneBook {
                 var personId = getPersonId(name);
                 var phoneId = getPhoneId(phone);
                 statement.executeUpdate(
-                        "insert or ignore into persons (name) values ('" + newName + "')");
+                        "INSERT OR IGNORE INTO persons (name) "
+                                + "VALUES ('" + newName + "')");
                 statement.executeUpdate(
-                        "update phonebook set personId = '" + getPersonId(newName)
-                                + "' where phoneId = '" + phoneId + "' "
-                                + "and personId = '" + personId + "'");
+                        "UPDATE phonebook SET personId = '" + getPersonId(newName)
+                                + "' WHERE phoneId = '" + phoneId + "' "
+                                + "AND personId = '" + personId + "'");
             }
         }
     }
@@ -239,10 +242,11 @@ public class PhoneBook {
                 var personId = getPersonId(name);
                 var phoneId = getPhoneId(phone);
                 statement.executeUpdate(
-                        "insert or ignore into phones (phone) values ('" + newPhone + "')");
+                        "INSERT OR IGNORE INTO phones (phone) "
+                        + "VALUES ('" + newPhone + "')");
                 statement.executeUpdate(
-                        "update phonebook set phoneId = '" + getPhoneId(newPhone)
-                                + "' where phoneId = '" + phoneId + "' and personId = '" + personId + "'");
+                        "UPDATE phonebook SET phoneId = '" + getPhoneId(newPhone)
+                                + "' WHERE phoneId = '" + phoneId + "' AND personId = '" + personId + "'");
             }
         }
     }
@@ -257,10 +261,10 @@ public class PhoneBook {
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
-                        "select persons.name, phones.phone "
-                                + "from persons, phones, phonebook "
-                                + "where persons.id = phonebook.personId "
-                                + "and phones.id = phonebook.phoneId");
+                        "SELECT persons.name, phones.phone "
+                                + "FROM persons, phones, phonebook "
+                                + "WHERE persons.id = phonebook.personId "
+                                + "AND phones.id = phonebook.phoneId");
                 var list = new ArrayList<Pair<String, String>>();
                 while (resultSet.next()) {
                     list.add(new Pair<>(resultSet.getString("name"),
