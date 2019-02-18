@@ -13,7 +13,7 @@ public class PhoneBook {
     /**
      * Database is located in the project's root.
      */
-    private final String DATABASE = "jdbc:sqlite:phones.db";
+    private final String DATABASE;
 
     /**
      * NoSuchRecordException erises if requested
@@ -24,7 +24,7 @@ public class PhoneBook {
          * Exception constructor.
          * @param error error description
          */
-        NoSuchRecordException(String error) {
+        NoSuchRecordException(@NotNull String error) {
             super(error);
         }
     }
@@ -34,24 +34,22 @@ public class PhoneBook {
      * Creates a local database.
      * @throws SQLException if database error occurs
      */
-    public PhoneBook() throws SQLException {
+    public PhoneBook(@NotNull String databasePath) throws SQLException {
+        DATABASE = "jdbc:sqlite:" + databasePath;
         try (Connection connection = DriverManager.getConnection(DATABASE)) {
             try (var statement = connection.createStatement()) {
-                statement.executeUpdate("DROP TABLE IF EXISTS persons");
                 statement.executeUpdate(
-                        "CREATE TABLE persons ("
+                        "CREATE TABLE IF NOT EXISTS persons ("
                         + "id INTEGER PRIMARY KEY AUTOINCREMENT ,"
                         + "name VARCHAR NOT NULL ,"
                         + "UNIQUE (name))");
-                statement.executeUpdate("DROP TABLE IF EXISTS phones");
                 statement.executeUpdate(
-                        "CREATE TABLE phones ("
+                        "CREATE TABLE IF NOT EXISTS phones ("
                         + "id INTEGER PRIMARY KEY AUTOINCREMENT ,"
                         + "phone VARCHAR NOT NULL ,"
                         + "UNIQUE (phone))");
-                statement.executeUpdate("DROP TABLE IF EXISTS phonebook");
                 statement.executeUpdate(
-                        "CREATE TABLE phonebook ("
+                        "CREATE TABLE IF NOT EXISTS phonebook ("
                         + "personId INTEGER NOT NULL ,"
                         + "phoneId INTEGER NOT NULL ,"
                         + "UNIQUE (personId, phoneId) ON CONFLICT IGNORE ,"
@@ -271,6 +269,20 @@ public class PhoneBook {
                             resultSet.getString("phone")));
                 }
                 return list;
+            }
+        }
+    }
+
+    /**
+     * Clear database.
+     * @throws SQLException if database error occurs
+     */
+    void clean() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+            try (var statement = connection.createStatement()) {
+                statement.executeUpdate("DELETE FROM phonebook");
+                statement.executeUpdate("DELETE FROM persons");
+                statement.executeUpdate("DELETE FROM phones");
             }
         }
     }

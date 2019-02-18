@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         var in = new Scanner(System.in);
         try {
-            var phoneBook = new PhoneBook();
+            var phoneBook = new PhoneBook("phonebook.db");
             while (true) {
                 System.out.print("Enter command: ");
                 String command = in.next();
@@ -90,7 +90,7 @@ public class Main {
                 }
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error: " + e.getMessage());
         }
 
     }

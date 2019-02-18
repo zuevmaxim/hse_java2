@@ -15,7 +15,8 @@ class PhoneBookTest {
 
     @BeforeEach
     void setUp() throws SQLException {
-        phoneBook = new PhoneBook();
+        phoneBook = new PhoneBook("test.db");
+        phoneBook.clean();
     }
 
     @Test
