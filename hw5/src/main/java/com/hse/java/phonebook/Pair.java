@@ -6,9 +6,12 @@ package com.hse.java.phonebook;
  * @param <S> second element type
  */
 class Pair<F, S> {
+    /** First pair element. */
     private final F first;
+    /** Second pair element. */
     private final S second;
 
+    /** Pair constructor. */
     Pair(F first, S second) {
         this.first = first;
         this.second = second;

@@ -4,16 +4,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Realize a phonebook.
  * Contains the information about people and their phone numbers.
  */
 public class PhoneBook {
-    /**
-     * Database is located in the project's root.
-     */
-    private final String DATABASE;
+    /** Database is located in the project's root. */
+    private final String dataBase;
 
     /**
      * NoSuchRecordException erises if requested
@@ -32,11 +31,12 @@ public class PhoneBook {
     /**
      * Phonebook constructor.
      * Creates a local database.
+     * @param databasePath path to the local database
      * @throws SQLException if database error occurs
      */
     public PhoneBook(@NotNull String databasePath) throws SQLException {
-        DATABASE = "jdbc:sqlite:" + databasePath;
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        dataBase = "jdbc:sqlite:" + databasePath;
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 statement.executeUpdate(
                         "CREATE TABLE IF NOT EXISTS persons ("
@@ -68,7 +68,7 @@ public class PhoneBook {
     @NotNull
     private String getPersonId(@NotNull String name)
             throws SQLException, NoSuchRecordException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
                         "SELECT id FROM persons "
@@ -91,7 +91,7 @@ public class PhoneBook {
     @NotNull
     private String getPhoneId(@NotNull String phone)
             throws SQLException, NoSuchRecordException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
                         "SELECT id FROM phones "
@@ -112,7 +112,7 @@ public class PhoneBook {
      */
     public void add(@NotNull String name, @NotNull String phone)
             throws SQLException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 statement.executeUpdate(
                         "INSERT OR IGNORE INTO persons (name) "
@@ -138,9 +138,9 @@ public class PhoneBook {
      * @throws NoSuchRecordException is there is no person with such name
      */
     @NotNull
-    public ArrayList<String> findByName(@NotNull String name)
+    public List<String> findByName(@NotNull String name)
             throws SQLException, NoSuchRecordException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
                         "SELECT phones.phone FROM phones, phonebook "
@@ -163,9 +163,9 @@ public class PhoneBook {
      * @throws NoSuchRecordException if there is no such phone number
      */
     @NotNull
-    public ArrayList<String> findByPhone(@NotNull String phone)
+    public List<String> findByPhone(@NotNull String phone)
             throws SQLException, NoSuchRecordException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
                         "SELECT persons.name FROM persons, phonebook "
@@ -189,7 +189,7 @@ public class PhoneBook {
      */
     public void remove(@NotNull String name, @NotNull String phone)
             throws SQLException, NoSuchRecordException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 statement.executeUpdate(
                         "DELETE FROM phonebook WHERE personId = '" + getPersonId(name)
@@ -209,7 +209,7 @@ public class PhoneBook {
     public void setName(@NotNull String name,
                         @NotNull String phone, @NotNull String newName)
             throws SQLException, NoSuchRecordException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 var personId = getPersonId(name);
                 var phoneId = getPhoneId(phone);
@@ -235,7 +235,7 @@ public class PhoneBook {
     public void setPhone(@NotNull String name,
                          @NotNull String phone, @NotNull String newPhone)
             throws SQLException, NoSuchRecordException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 var personId = getPersonId(name);
                 var phoneId = getPhoneId(phone);
@@ -255,8 +255,8 @@ public class PhoneBook {
      * @throws SQLException if database error occurs
      */
     @NotNull
-    public ArrayList<Pair<String, String>> allPairs() throws SQLException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+    public List<Pair<String, String>> allPairs() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 ResultSet resultSet = statement.executeQuery(
                         "SELECT persons.name, phones.phone "
@@ -277,8 +277,8 @@ public class PhoneBook {
      * Clear database.
      * @throws SQLException if database error occurs
      */
-    void clean() throws SQLException {
-        try (Connection connection = DriverManager.getConnection(DATABASE)) {
+    public void clean() throws SQLException {
+        try (Connection connection = DriverManager.getConnection(dataBase)) {
             try (var statement = connection.createStatement()) {
                 statement.executeUpdate("DELETE FROM phonebook");
                 statement.executeUpdate("DELETE FROM persons");
