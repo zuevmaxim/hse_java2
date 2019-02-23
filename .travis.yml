@@ -1,0 +1,17 @@
+language: java
+
+os:
+  - linux
+
+jdk:
+  - oraclejdk11
+
+env:
+  - PROJECT_DIR=hw1
+  - PROJECT_DIR=hw2
+  - PROJECT_DIR=hw3
+
+script: cd $PROJECT_DIR && mvn install
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
