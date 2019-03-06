@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 
 import com.java.injector.testClasses.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -67,5 +68,31 @@ public class InjectorTest {
                 () -> Injector.initialize(
                         "com.java.injector.testClasses.ClassWithOneInterfaceDependency",
                         implementations));
+    }
+
+    @Test
+    public void injectorShouldThrowIfAmbiguousImplementationEvenWithExtends() {
+        var implementations = new ArrayList<String>();
+        implementations.add("com.java.injector.testClasses.InterfaceImpl");
+        implementations.add("com.java.injector.testClasses.ClassExtendsAnotherInterfaceImpl");
+        assertThrows(AmbiguousImplementationException.class,
+                () -> Injector.initialize(
+                        "com.java.injector.testClasses.ClassWithOneInterfaceDependency",
+                        implementations));
+    }
+
+    @Test
+    public void injectorShouldInitializeClassWithSeveralClassDependency()
+            throws IllegalAccessException, AmbiguousImplementationException, InstantiationException,
+            ImplementationNotFoundException, InjectionCycleException, InvocationTargetException,
+            ClassNotFoundException {
+        var implementations = new ArrayList<String>();
+        implementations.add("com.java.injector.testClasses.ClassWithOneClassDependency");
+        implementations.add("com.java.injector.testClasses.ClassExtendsAnotherInterfaceImpl");
+        implementations.add("com.java.injector.testClasses.ClassWithoutDependencies");
+        Object object = Injector.initialize(
+                "com.java.injector.testClasses.ClassWithSeveralDependencies",
+                implementations);
+        assertTrue(object instanceof ClassWithSeveralDependencies);
     }
 }
