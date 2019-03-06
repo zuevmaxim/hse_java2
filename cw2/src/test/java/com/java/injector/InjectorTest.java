@@ -5,6 +5,7 @@ import org.junit.jupiter.api.*;
 
 import com.java.injector.testClasses.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 
@@ -40,5 +41,31 @@ public class InjectorTest {
         assertTrue(object instanceof ClassWithOneInterfaceDependency);
         ClassWithOneInterfaceDependency instance = (ClassWithOneInterfaceDependency) object;
         assertTrue(instance.dependency instanceof InterfaceImpl);
+    }
+
+    @Test
+    public void injectorShouldThrowExceptionIfCycleDependency() {
+        assertThrows(InjectionCycleException.class,
+                () -> Injector.initialize("com.java.injector.testClasses.FirstClassWithCycleDependency",
+                        Collections.singletonList("com.java.injector.testClasses.SecondClassWithCycleDependency")));
+    }
+
+    @Test
+    public void injectorShouldThrowIfNoImplementationGiven() {
+        assertThrows(ImplementationNotFoundException.class,
+                () -> Injector.initialize(
+                        "com.java.injector.testClasses.ClassWithOneInterfaceDependency",
+                        Collections.emptyList()));
+    }
+
+    @Test
+    public void injectorShouldThrowIfAmbiguousImplementation() {
+        var implementations = new ArrayList<String>();
+        implementations.add("com.java.injector.testClasses.InterfaceImpl");
+        implementations.add("com.java.injector.testClasses.AnotherInterfaceImpl");
+        assertThrows(AmbiguousImplementationException.class,
+                () -> Injector.initialize(
+                        "com.java.injector.testClasses.ClassWithOneInterfaceDependency",
+                        implementations));
     }
 }

@@ -1,21 +1,29 @@
 package com.java.injector;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-
+/**
+ * Provides static initialize method for creating objects and resolve dependencies;
+ */
 public class Injector {
+    /**
+     * Objects that have been built.
+     */
     private static final Map<Class<?>, Object> objects = new HashMap<>();
-    private static final List<Class<?>> tasks = new ArrayList<>();
+    /**
+     * Classes that should be built.
+     * If a class is added twice then there is a cycle dependency.
+     */
+    private static final Set<Class<?>> tasks = new HashSet<>();
     /**
      * Create and initialize object of `rootClassName` class using classes from
      * `implementationClassNames` for concrete dependencies.
      */
-    public static Object initialize(String rootClassName, List<String> implementationClassNames)
+    public static Object initialize(@NotNull String rootClassName, @NotNull List<String> implementationClassNames)
             throws ClassNotFoundException, InjectionCycleException, InvocationTargetException,
             InstantiationException, IllegalAccessException, ImplementationNotFoundException,
             AmbiguousImplementationException {
@@ -29,7 +37,16 @@ public class Injector {
         return build(root, implementations);
     }
 
-    private static Object build(Class<?> root, List<Class<?>> implementations)
+    /**
+     * Recursively build object resolving dependencies.
+     * @param root class of object to build
+     * @param implementations given implementations for constructor arguments
+     * @return object of root class
+     * @throws InjectionCycleException if there is a cycle dependency
+     * @throws ImplementationNotFoundException if vital class was not given
+     * @throws AmbiguousImplementationException if several classes implements the same interface
+     */
+    private static Object build(@NotNull Class<?> root, @NotNull List<Class<?>> implementations)
             throws InjectionCycleException, IllegalAccessException, InvocationTargetException,
             InstantiationException, ImplementationNotFoundException, AmbiguousImplementationException {
         if (objects.containsKey(root)) {
@@ -57,7 +74,15 @@ public class Injector {
         return result;
     }
 
-    private static Class<?> findImplementation(Class<?> abstractClass, List<Class<?>> implementations)
+    /**
+     * Find class implementing 'abstractClass'.
+     * @param abstractClass interface or abstract class
+     * @param implementations given implementations
+     * @return class implementing 'abstractClass'
+     * @throws AmbiguousImplementationException no implementing class found
+     * @throws ImplementationNotFoundException if several classes implements the same interface
+     */
+    private static Class<?> findImplementation(@NotNull Class<?> abstractClass, @NotNull List<Class<?>> implementations)
             throws AmbiguousImplementationException, ImplementationNotFoundException {
         Class<?> result = null;
         for (var implementation : implementations) {
