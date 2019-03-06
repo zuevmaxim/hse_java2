@@ -1,6 +1,5 @@
 package com.hse.java.reflector;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -46,22 +45,24 @@ public class Reflector {
     private static void writeFields(Field[] fields, FileWriter out, int tabsNumber) throws IOException {
         for (var field : fields) {
             writeModifiers(field.getModifiers(), out, tabsNumber + 1);
-            out.write(field.getGenericType().getTypeName());
+            out.write(field.getGenericType().getTypeName().replace('$', '.'));
             out.write(" " + field.getName());
             if (Modifier.isFinal(field.getModifiers())) {
-                out.write(" = ");
-                if (field.getType().isPrimitive()) {
-                    if (field.getType() == boolean.class) {
-                        out.write("false");
-                    } else {
-                        out.write("0");
-                    }
-                } else {
-                    out.write("null");
-                }
+                out.write(" = " + getDefaultValue(field.getType()));
             }
             out.write(";\n");
         }
+    }
+
+    private static String getDefaultValue(Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            if (clazz == boolean.class) {
+                return "false";
+            } else {
+                return "0";
+            }
+        }
+        return "null";
     }
 
     private static void writeConstructors(Constructor[] constructors, FileWriter out, int tabsNumber) throws IOException {
@@ -69,42 +70,37 @@ public class Reflector {
             writeModifiers(constructor.getModifiers(), out, tabsNumber + 1);
             out.write(constructor.getDeclaringClass().getSimpleName() + "(");
             writeParameters(constructor.getParameters(), out);
-            out.write(") { }\n");
+            out.write(") ");
+            writeExceptions(constructor.getGenericExceptionTypes(), out);
+            out.write("{ }\n");
+        }
+    }
+
+    private static void writeExceptions(Type[] exceptions, FileWriter out) throws IOException {
+        if (exceptions.length != 0) {
+            out.write("throws ");
+            out.write(exceptions[0].getTypeName());
+            for (int i = 1; i < exceptions.length; i++) {
+                out.write(", " + exceptions[i].getTypeName());
+            }
+            out.write(" ");
         }
     }
 
     private static void writeMethods(Method[] methods, FileWriter out, int tabsNumber) throws IOException {
         for (var method : methods) {
             writeModifiers(method.getModifiers(), out, tabsNumber + 1);
-            out.write(method.getGenericReturnType().getTypeName() + " ");
+            out.write(method.getGenericReturnType().getTypeName().replace('$', '.') + " ");
             out.write(method.getName() + "(");
             writeParameters(method.getParameters(), out);
-            out.write(")");
-            var exceptions = method.getGenericExceptionTypes();
-            if (exceptions.length != 0) {
-                out.write(" throws ");
-                out.write(exceptions[0].getTypeName());
-                for (int i = 1; i < exceptions.length; i++) {
-                    out.write(", " + exceptions[0].getTypeName());
-                }
-                out.write(" ");
-            }
+            out.write(") ");
+            writeExceptions(method.getGenericExceptionTypes(), out);
             if (method.getReturnType() == void.class) {
-                out.write("{ }");
+                out.write("{ }\n");
             } else {
                 out.write("{\n");
                 writeTabs(out, tabsNumber + 2);
-                out.write("return ");
-                if (method.getReturnType().isPrimitive()) {
-                    if (method.getReturnType() == boolean.class) {
-                        out.write("false");
-                    } else {
-                        out.write("0");
-                    }
-                } else {
-                    out.write("null");
-                }
-                out.write(";\n");
+                out.write("return " + getDefaultValue(method.getReturnType()) + ";\n");
                 writeTabs(out, tabsNumber + 1);
                 out.write("}\n");
             }
@@ -130,9 +126,9 @@ public class Reflector {
         if (parameters.length == 0) {
             return;
         }
-        out.write(parameters[0].getParameterizedType().getTypeName() + " " + parameters[0].getName());
+        out.write(parameters[0].getParameterizedType().getTypeName().replace('$', '.') + " " + parameters[0].getName());
         for (int i = 1; i < parameters.length; i++) {
-            out.write(", " + parameters[i].getParameterizedType().getTypeName() + " " + parameters[i].getName());
+            out.write(", " + parameters[i].getParameterizedType().getTypeName().replace('$', '.') + " " + parameters[i].getName());
         }
     }
 
@@ -163,10 +159,10 @@ public class Reflector {
         var interfaces = clazz.getInterfaces();
         if (interfaces.length != 0) {
             out.write("implements ");
-            out.write(interfaces[0].getSimpleName());
+            out.write(interfaces[0].getName());
             writeTypeParameters(interfaces[0], out);
             for (int i = 1; i < interfaces.length; i++) {
-                out.write(", " + interfaces[i].getSimpleName());
+                out.write(", " + interfaces[i].getName());
                 writeTypeParameters(interfaces[i], out);
             }
             out.write(" ");
@@ -175,7 +171,7 @@ public class Reflector {
 
     public static void diffClasses(Class<?> a, Class<?> b, FileWriter out) throws IOException {
         writeFields(diffFields(a, b), out, 0);
-        //writeMethods(diffMethods(a, b), out, 0); //TODO
+        writeMethods(diffMethods(a, b), out, 0);
     }
 
     private static Field[] diffFields(Class<?> a, Class<?> b) {
@@ -197,19 +193,31 @@ public class Reflector {
     }
 
     private static Method[] diffMethods(Class<?> a, Class<?> b) {
-        var diff = diff(a.getDeclaredMethods(), b.getDeclaredMethods());
+        var diff = diff(getMethodContainerArray(a), getMethodContainerArray(b));
         var arrayDiff = new Method[diff.size()];
-        return diff.toArray(arrayDiff);
+        for (int i = 0; i < diff.size(); i++) {
+            arrayDiff[i] = diff.get(i).getMethod();
+        }
+        return arrayDiff;
+    }
+
+    private static MethodContainer[] getMethodContainerArray(Class<?> clazz) {
+        var methods = clazz.getDeclaredMethods();
+        MethodContainer[] methodContainers = new MethodContainer[methods.length];
+        for (int i = 0 ; i < methods.length; i++) {
+            methodContainers[i] = new MethodContainer(methods[i]);
+        }
+        return methodContainers;
     }
 
     private static class FieldContainer {
         private final Field field;
 
-        public FieldContainer(Field field) {
+        private FieldContainer(Field field) {
             this.field = field;
         }
 
-        public Field getField() {
+        private Field getField() {
             return field;
         }
 
@@ -228,8 +236,36 @@ public class Reflector {
         }
     }
 
+    private static class MethodContainer {
+        private final Method method;
+
+        private MethodContainer(Method method) {
+            this.method = method;
+        }
+
+        private Method getMethod() {
+            return method;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof MethodContainer)) {
+                return false;
+            }
+            var other = (MethodContainer) obj;
+
+            return method.getName().equals(other.method.getName())
+                    && method.getReturnType() == other.method.getReturnType()
+                    && Modifier.toString(method.getModifiers()).equals(Modifier.toString(other.method.getModifiers()))
+                    && method.getDeclaringClass().getSimpleName().equals(other.method.getDeclaringClass().getSimpleName())
+                    && Arrays.equals(method.getParameterTypes(), other.method.getParameterTypes())
+                    && Arrays.equals(method.getExceptionTypes(), other.method.getExceptionTypes());
+
+        }
+    }
+
     private static <T> List<T> diff(T[] a, T[] b) {
-        var bSet = new ArrayList<T>(Arrays.asList(b));
+        var bSet = new ArrayList<>(Arrays.asList(b));
         var diff = new ArrayList<T>();
         for (var aElement : a) {
             if (!bSet.contains(aElement)) {
@@ -242,26 +278,4 @@ public class Reflector {
         return diff;
     }
 
-    private static class MyClass<T, K> {
-        private final T t;
-        private final K k;
-
-        MyClass(T t, K k) {
-            this.k = k;
-            this.t = t;
-        }
-
-        <U> U getU(U u) throws IOException {
-            return u;
-        }
-
-        T getT() throws Exception {
-            return t;
-        }
-    }
-
-    public static void main(String[] args) throws IOException {
-        printStructure(MyClass.class);
-        printStructure(String.class);
-    }
 }
