@@ -15,7 +15,10 @@ public class Injector {
      * Create and initialize object of `rootClassName` class using classes from
      * `implementationClassNames` for concrete dependencies.
      */
-    public static Object initialize(String rootClassName, List<String> implementationClassNames) throws ClassNotFoundException, InjectionCycleException, InvocationTargetException, InstantiationException, IllegalAccessException, ImplementationNotFoundException {
+    public static Object initialize(String rootClassName, List<String> implementationClassNames)
+            throws ClassNotFoundException, InjectionCycleException, InvocationTargetException,
+            InstantiationException, IllegalAccessException, ImplementationNotFoundException,
+            AmbiguousImplementationException {
         tasks.clear();
         objects.clear();
         var root = Class.forName(rootClassName);
@@ -26,7 +29,9 @@ public class Injector {
         return build(root, implementations);
     }
 
-    private static Object build(Class<?> root, List<Class<?>> implementations) throws InjectionCycleException, IllegalAccessException, InvocationTargetException, InstantiationException, ImplementationNotFoundException {
+    private static Object build(Class<?> root, List<Class<?>> implementations)
+            throws InjectionCycleException, IllegalAccessException, InvocationTargetException,
+            InstantiationException, ImplementationNotFoundException, AmbiguousImplementationException {
         if (objects.containsKey(root)) {
             return objects.get(root);
         }
@@ -41,18 +46,36 @@ public class Injector {
             Class<?> parameterClass = null;
             var modifier = dependency.getModifiers();
             if (Modifier.isAbstract(modifier) || Modifier.isInterface(modifier)) {
-                throw new UnsupportedOperationException();
+                parameterClass = findImplementation(dependency, implementations);
             } else {
                 parameterClass = dependency;
             }
-            if (!implementations.contains(parameterClass)) {
-                throw new ImplementationNotFoundException();
-            }
             parameterObjects.add(build(parameterClass, implementations));
         }
-
         Object result = constructor.newInstance(parameterObjects.toArray());
         objects.put(root, result);
+        return result;
+    }
+
+    private static Class<?> findImplementation(Class<?> abstractClass, List<Class<?>> implementations)
+            throws AmbiguousImplementationException, ImplementationNotFoundException {
+        Class<?> result = null;
+        for (var implementation : implementations) {
+            var modifier = implementation.getModifiers();
+            if (Modifier.isAbstract(modifier) || Modifier.isInterface(modifier)) {
+                continue;
+            }
+            if (abstractClass.isAssignableFrom(implementation)) {
+                if (result == null) {
+                    result = implementation;
+                } else {
+                    throw new AmbiguousImplementationException();
+                }
+            }
+        }
+        if (result == null) {
+            throw new ImplementationNotFoundException();
+        }
         return result;
     }
 }
