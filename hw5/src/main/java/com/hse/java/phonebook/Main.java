@@ -15,7 +15,7 @@ public class Main {
         try {
             var phoneBook = new PhoneBook("phonebook.db");
             while (true) {
-                System.out.print("Enter command: ");
+                System.out.print("Enter command: (8 - help)");
                 String command = in.next();
                 try {
                     switch (command) {
@@ -79,6 +79,21 @@ public class Main {
                                 System.out.print(' ');
                                 System.out.println(pair.getSecond());
                             }
+                            break;
+                        }
+                        case "8": {
+                            System.out.println("Phone book application.");
+                            System.out.println("Contains the information about phones and owners.");
+                            System.out.println("Commands:");
+                            System.out.println("0 - exit");
+                            System.out.println("1 - add new record (name, phone)");
+                            System.out.println("2 - find phones by name");
+                            System.out.println("3 - find names by phone");
+                            System.out.println("4 - delete record (name, phone)");
+                            System.out.println("5 - change name in a particular record");
+                            System.out.println("6 - change phone in a particular record");
+                            System.out.println("7 - print all records");
+                            System.out.println("8 - help");
                             break;
                         }
                         default: {

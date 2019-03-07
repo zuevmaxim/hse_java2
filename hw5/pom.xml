@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.hse.java</groupId>
-    <artifactId>DataBase</artifactId>
+    <artifactId>hw5</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -94,4 +94,5 @@
             <version>3.25.2</version>
         </dependency>
     </dependencies>
+
 </project>

@@ -18,7 +18,7 @@ public class PhoneBook {
      * NoSuchRecordException erises if requested
      * a person name or phone which is no presented in the database.
      */
-    public class NoSuchRecordException extends Exception {
+    public static class NoSuchRecordException extends Exception {
         /**
          * Exception constructor.
          * @param error error description
@@ -69,10 +69,10 @@ public class PhoneBook {
     private String getPersonId(@NotNull String name)
             throws SQLException, NoSuchRecordException {
         try (Connection connection = DriverManager.getConnection(dataBase)) {
-            try (var statement = connection.createStatement()) {
-                ResultSet resultSet = statement.executeQuery(
-                        "SELECT id FROM persons "
-                        + "WHERE name = '" + name + "'");
+            var statement = "SELECT id FROM persons WHERE name = ?";
+            try (var preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, name);
+                ResultSet resultSet = preparedStatement.executeQuery();
                 if (!resultSet.next()) {
                     throw new NoSuchRecordException(
                             "There is no person with such name: " + name);
@@ -92,10 +92,10 @@ public class PhoneBook {
     private String getPhoneId(@NotNull String phone)
             throws SQLException, NoSuchRecordException {
         try (Connection connection = DriverManager.getConnection(dataBase)) {
-            try (var statement = connection.createStatement()) {
-                ResultSet resultSet = statement.executeQuery(
-                        "SELECT id FROM phones "
-                        + "WHERE phone = '" + phone + "'");
+            var statement = "SELECT id FROM phones WHERE phone = ?";
+            try (var preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, phone);
+                ResultSet resultSet = preparedStatement.executeQuery();
                 if (!resultSet.next()) {
                     throw new NoSuchRecordException("There is no such phone: " + phone);
                 }
@@ -113,17 +113,19 @@ public class PhoneBook {
     public void add(@NotNull String name, @NotNull String phone)
             throws SQLException {
         try (Connection connection = DriverManager.getConnection(dataBase)) {
-            try (var statement = connection.createStatement()) {
-                statement.executeUpdate(
-                        "INSERT OR IGNORE INTO persons (name) "
-                                + "VALUES ('" + name + "')");
-                statement.executeUpdate(
-                        "INSERT OR IGNORE INTO phones (phone) "
-                                + "VALUES ('" + phone + "')");
-                statement.executeUpdate(
-                        "INSERT INTO phonebook (personId, phoneId) "
-                                + "VALUES ('" + getPersonId(name) + "', '"
-                                + getPhoneId(phone) + "')");
+            var insertIntoPersons = "INSERT OR IGNORE INTO persons (name) VALUES (?)";
+            var insertIntoPhones = "INSERT OR IGNORE INTO  phones (phone)  VALUES (?)";
+            var insertIntoPhonebook = "INSERT INTO phonebook (personId, phoneId) VALUES (?, ?)";
+            try (var personsPreparedStatement = connection.prepareStatement(insertIntoPersons);
+                    var phonesPreparedStatement = connection.prepareStatement(insertIntoPhones);
+                    var phonebookPreparedStatement = connection.prepareStatement(insertIntoPhonebook)) {
+                personsPreparedStatement.setString(1, name);
+                personsPreparedStatement.executeUpdate();
+                phonesPreparedStatement.setString(1, phone);
+                phonesPreparedStatement.executeUpdate();
+                phonebookPreparedStatement.setString(1, getPersonId(name));
+                phonebookPreparedStatement.setString(2, getPhoneId(phone));
+                phonebookPreparedStatement.executeUpdate();
             } catch (NoSuchRecordException e) {
                 assert false;
             }
@@ -141,11 +143,11 @@ public class PhoneBook {
     public List<String> findByName(@NotNull String name)
             throws SQLException, NoSuchRecordException {
         try (Connection connection = DriverManager.getConnection(dataBase)) {
-            try (var statement = connection.createStatement()) {
-                ResultSet resultSet = statement.executeQuery(
-                        "SELECT phones.phone FROM phones, phonebook "
-                            + "WHERE phones.id = phonebook.phoneId "
-                            + "AND phonebook.personId = '" + getPersonId(name) + "'");
+            var statement = "SELECT phones.phone FROM phones, phonebook WHERE phones.id = phonebook.phoneId "
+                    + "AND phonebook.personId = ?";
+            try (var preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, getPersonId(name));
+                ResultSet resultSet = preparedStatement.executeQuery();
                 var list = new ArrayList<String>();
                 while (resultSet.next()) {
                     list.add(resultSet.getString("phone"));
@@ -166,11 +168,11 @@ public class PhoneBook {
     public List<String> findByPhone(@NotNull String phone)
             throws SQLException, NoSuchRecordException {
         try (Connection connection = DriverManager.getConnection(dataBase)) {
-            try (var statement = connection.createStatement()) {
-                ResultSet resultSet = statement.executeQuery(
-                        "SELECT persons.name FROM persons, phonebook "
-                                + "WHERE persons.id = phonebook.personId "
-                                + "AND phonebook.phoneId = '" + getPhoneId(phone) + "'");
+            var statement = "SELECT persons.name FROM persons, phonebook WHERE persons.id = phonebook.personId "
+                    + "AND phonebook.phoneId = ?";
+            try (var preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, getPhoneId(phone));
+                ResultSet resultSet = preparedStatement.executeQuery();
                 var list = new ArrayList<String>();
                 while (resultSet.next()) {
                     list.add(resultSet.getString("name"));
@@ -190,10 +192,11 @@ public class PhoneBook {
     public void remove(@NotNull String name, @NotNull String phone)
             throws SQLException, NoSuchRecordException {
         try (Connection connection = DriverManager.getConnection(dataBase)) {
-            try (var statement = connection.createStatement()) {
-                statement.executeUpdate(
-                        "DELETE FROM phonebook WHERE personId = '" + getPersonId(name)
-                                + "' AND phoneId = '" + getPhoneId(phone) + "'");
+            var statement = "DELETE FROM phonebook WHERE personId = ? AND phoneId = ?";
+            try (var preparedStatement = connection.prepareStatement(statement)) {
+                preparedStatement.setString(1, getPersonId(name));
+                preparedStatement.setString(2, getPhoneId(phone));
+                preparedStatement.executeUpdate();
             }
         }
     }
@@ -210,16 +213,19 @@ public class PhoneBook {
                         @NotNull String phone, @NotNull String newName)
             throws SQLException, NoSuchRecordException {
         try (Connection connection = DriverManager.getConnection(dataBase)) {
-            try (var statement = connection.createStatement()) {
+            var insertNewName = "INSERT OR IGNORE INTO persons (name) VALUES (?)";
+            var setNewName = "UPDATE phonebook SET personId = ? WHERE phoneId = ? AND personId = ?";
+            //noinspection Duplicates
+            try (var insertPreparedStatement = connection.prepareStatement(insertNewName);
+                    var setPreparedStatement = connection.prepareStatement(setNewName)) {
                 var personId = getPersonId(name);
                 var phoneId = getPhoneId(phone);
-                statement.executeUpdate(
-                        "INSERT OR IGNORE INTO persons (name) "
-                                + "VALUES ('" + newName + "')");
-                statement.executeUpdate(
-                        "UPDATE phonebook SET personId = '" + getPersonId(newName)
-                                + "' WHERE phoneId = '" + phoneId + "' "
-                                + "AND personId = '" + personId + "'");
+                insertPreparedStatement.setString(1, newName);
+                insertPreparedStatement.executeUpdate();
+                setPreparedStatement.setString(1, getPersonId(newName));
+                setPreparedStatement.setString(2, phoneId);
+                setPreparedStatement.setString(3, personId);
+                setPreparedStatement.executeUpdate();
             }
         }
     }
@@ -236,15 +242,19 @@ public class PhoneBook {
                          @NotNull String phone, @NotNull String newPhone)
             throws SQLException, NoSuchRecordException {
         try (Connection connection = DriverManager.getConnection(dataBase)) {
-            try (var statement = connection.createStatement()) {
+            var insertNewPhone = "INSERT OR IGNORE INTO phones (phone) VALUES (?)";
+            var setNewPhone = "UPDATE phonebook SET phoneId = ? WHERE phoneId = ? AND personId = ?";
+            //noinspection Duplicates
+            try (var insertPreparedStatement = connection.prepareStatement(insertNewPhone);
+                 var setPreparedStatement = connection.prepareStatement(setNewPhone)) {
                 var personId = getPersonId(name);
                 var phoneId = getPhoneId(phone);
-                statement.executeUpdate(
-                        "INSERT OR IGNORE INTO phones (phone) "
-                        + "VALUES ('" + newPhone + "')");
-                statement.executeUpdate(
-                        "UPDATE phonebook SET phoneId = '" + getPhoneId(newPhone)
-                                + "' WHERE phoneId = '" + phoneId + "' AND personId = '" + personId + "'");
+                insertPreparedStatement.setString(1, newPhone);
+                insertPreparedStatement.executeUpdate();
+                setPreparedStatement.setString(1, getPhoneId(newPhone));
+                setPreparedStatement.setString(2, phoneId);
+                setPreparedStatement.setString(3, personId);
+                setPreparedStatement.executeUpdate();
             }
         }
     }

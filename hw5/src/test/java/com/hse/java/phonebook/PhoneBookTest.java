@@ -1,5 +1,6 @@
 package com.hse.java.phonebook;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,10 @@ class PhoneBookTest {
     @BeforeEach
     void setUp() throws SQLException {
         phoneBook = new PhoneBook("test.db");
+    }
+
+    @AfterEach
+    void clean() throws SQLException {
         phoneBook.clean();
     }
 
@@ -22,6 +27,12 @@ class PhoneBookTest {
     void add() throws SQLException, PhoneBook.NoSuchRecordException {
         phoneBook.add("Jack", "1");
         assertEquals(Collections.singletonList("1"), phoneBook.findByName("Jack"));
+    }
+
+    @Test
+    void addStrangeName() throws SQLException, PhoneBook.NoSuchRecordException {
+        phoneBook.add("Robert'); DELETE FROM persons; --", "1");
+        assertEquals(Collections.singletonList("1"), phoneBook.findByName("Robert'); DELETE FROM persons; --"));
     }
 
     @Test
@@ -50,7 +61,6 @@ class PhoneBookTest {
         assertEquals(Arrays.asList("Jack", "John"), phoneBook.findByPhone("1"));
         assertEquals(Collections.singletonList("Mike"), phoneBook.findByPhone("2"));
         assertEquals(Collections.singletonList("John"), phoneBook.findByPhone("3"));
-
     }
 
     @Test
