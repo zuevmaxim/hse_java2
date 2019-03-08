@@ -1,20 +1,22 @@
 package com.hse.java.reflector;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
 
 public class Reflector {
-    public static void  printStructure(Class<?> someClass) throws IOException {
+    public static void  printStructure(@NotNull Class<?> someClass) throws IOException {
         try (var out = new FileWriter(someClass.getSimpleName() + ".java")) {
             recursivePrintStructure(someClass, out, 0);
         }
     }
 
     private static void recursivePrintStructure(
-            Class<?> someClass,
-            FileWriter out,
+            @NotNull Class<?> someClass,
+            @NotNull FileWriter out,
             int tabsNumber) throws IOException {
         var name = someClass.getSimpleName();
         writeModifiers(someClass.getModifiers(), out, tabsNumber);
@@ -42,10 +44,11 @@ public class Reflector {
 
     }
 
-    private static void writeFields(Field[] fields, FileWriter out, int tabsNumber) throws IOException {
+    private static void writeFields(@NotNull Field[] fields, @NotNull FileWriter out, int tabsNumber)
+            throws IOException {
         for (var field : fields) {
             writeModifiers(field.getModifiers(), out, tabsNumber + 1);
-            out.write(field.getGenericType().getTypeName().replace('$', '.'));
+            out.write(getType(field.getGenericType()));
             out.write(" " + field.getName());
             if (Modifier.isFinal(field.getModifiers())) {
                 out.write(" = " + getDefaultValue(field.getType()));
@@ -54,7 +57,13 @@ public class Reflector {
         }
     }
 
-    private static String getDefaultValue(Class<?> clazz) {
+    @NotNull
+    private static String getType(@NotNull Type type) {
+        return type.getTypeName().replace('$', '.');
+    }
+
+    @NotNull
+    private static String getDefaultValue(@NotNull Class<?> clazz) {
         if (clazz.isPrimitive()) {
             if (clazz == boolean.class) {
                 return "false";
@@ -65,7 +74,9 @@ public class Reflector {
         return "null";
     }
 
-    private static void writeConstructors(Constructor[] constructors, FileWriter out, int tabsNumber) throws IOException {
+    private static void writeConstructors(@NotNull Constructor[] constructors,
+                                          @NotNull FileWriter out, int tabsNumber)
+            throws IOException {
         for (var constructor : constructors) {
             writeModifiers(constructor.getModifiers(), out, tabsNumber + 1);
             out.write(constructor.getDeclaringClass().getSimpleName() + "(");
@@ -76,7 +87,8 @@ public class Reflector {
         }
     }
 
-    private static void writeExceptions(Type[] exceptions, FileWriter out) throws IOException {
+    private static void writeExceptions(@NotNull Type[] exceptions, @NotNull FileWriter out)
+            throws IOException {
         if (exceptions.length != 0) {
             out.write("throws ");
             out.write(exceptions[0].getTypeName());
@@ -87,10 +99,11 @@ public class Reflector {
         }
     }
 
-    private static void writeMethods(Method[] methods, FileWriter out, int tabsNumber) throws IOException {
+    private static void writeMethods(@NotNull Method[] methods, @NotNull FileWriter out, int tabsNumber)
+            throws IOException {
         for (var method : methods) {
             writeModifiers(method.getModifiers(), out, tabsNumber + 1);
-            out.write(method.getGenericReturnType().getTypeName().replace('$', '.') + " ");
+            out.write(getType(method.getGenericReturnType()) + " ");
             out.write(method.getName() + "(");
             writeParameters(method.getParameters(), out);
             out.write(") ");
@@ -108,13 +121,14 @@ public class Reflector {
         }
     }
 
-    private static void writeTabs(FileWriter out, int tabsNumber) throws IOException {
+    private static void writeTabs(@NotNull FileWriter out, int tabsNumber) throws IOException {
         for (int i = 0; i < tabsNumber; i++) {
             out.write('\t');
         }
     }
 
-    private static void writeModifiers(int modifier, FileWriter out, int tabsNumber) throws IOException {
+    private static void writeModifiers(int modifier, @NotNull FileWriter out, int tabsNumber)
+            throws IOException {
         writeTabs(out, tabsNumber);
         var stringModifier = Modifier.toString(modifier);
         if (!stringModifier.equals("")) {
@@ -122,17 +136,19 @@ public class Reflector {
         }
     }
 
-    private static void writeParameters(Parameter[] parameters, FileWriter out) throws IOException {
+    private static void writeParameters(@NotNull Parameter[] parameters, @NotNull FileWriter out)
+            throws IOException {
         if (parameters.length == 0) {
             return;
         }
-        out.write(parameters[0].getParameterizedType().getTypeName().replace('$', '.') + " " + parameters[0].getName());
+        out.write(getType(parameters[0].getParameterizedType()) + " " + parameters[0].getName());
         for (int i = 1; i < parameters.length; i++) {
-            out.write(", " + parameters[i].getParameterizedType().getTypeName().replace('$', '.') + " " + parameters[i].getName());
+            out.write(", " + getType(parameters[i].getParameterizedType()) + " " + parameters[i].getName());
         }
     }
 
-    private static void writeTypeParameters(Class<?> clazz, FileWriter out) throws IOException {
+    private static void writeTypeParameters(@NotNull Class<?> clazz, @NotNull FileWriter out)
+            throws IOException {
         var typeParameters = clazz.getTypeParameters();
         if (typeParameters.length > 0) {
             out.write("<" + typeParameters[0].getName());
@@ -143,7 +159,8 @@ public class Reflector {
         }
     }
 
-    private static void writeExtends(Class<?> clazz, FileWriter out) throws IOException {
+    private static void writeExtends(@NotNull Class<?> clazz, @NotNull FileWriter out)
+            throws IOException {
         var parentClass = clazz.getSuperclass();
         var parent = parentClass == null || parentClass == Object.class
                 ? null
@@ -155,7 +172,8 @@ public class Reflector {
         }
     }
 
-    private static void writeImplements(Class<?> clazz, FileWriter out) throws IOException {
+    private static void writeImplements(@NotNull Class<?> clazz, @NotNull FileWriter out)
+            throws IOException {
         var interfaces = clazz.getInterfaces();
         if (interfaces.length != 0) {
             out.write("implements ");
@@ -169,12 +187,14 @@ public class Reflector {
         }
     }
 
-    public static void diffClasses(Class<?> a, Class<?> b, FileWriter out) throws IOException {
+    public static void diffClasses(@NotNull Class<?> a, @NotNull Class<?> b, @NotNull FileWriter out)
+            throws IOException {
         writeFields(diffFields(a, b), out, 0);
         writeMethods(diffMethods(a, b), out, 0);
     }
 
-    private static Field[] diffFields(Class<?> a, Class<?> b) {
+    @NotNull
+    private static Field[] diffFields(@NotNull Class<?> a, @NotNull Class<?> b) {
         var diff = diff(getFieldContainerArray(a), getFieldContainerArray(b));
         var arrayDiff = new Field[diff.size()];
         for (int i = 0; i < diff.size(); i++) {
@@ -183,7 +203,8 @@ public class Reflector {
         return arrayDiff;
     }
 
-    private static FieldContainer[] getFieldContainerArray(Class<?> clazz) {
+    @NotNull
+    private static FieldContainer[] getFieldContainerArray(@NotNull Class<?> clazz) {
         var fields = clazz.getDeclaredFields();
         FieldContainer[] fieldContainers = new FieldContainer[fields.length];
         for (int i = 0 ; i < fields.length; i++) {
@@ -192,7 +213,8 @@ public class Reflector {
         return fieldContainers;
     }
 
-    private static Method[] diffMethods(Class<?> a, Class<?> b) {
+    @NotNull
+    private static Method[] diffMethods(@NotNull Class<?> a, @NotNull Class<?> b) {
         var diff = diff(getMethodContainerArray(a), getMethodContainerArray(b));
         var arrayDiff = new Method[diff.size()];
         for (int i = 0; i < diff.size(); i++) {
@@ -201,7 +223,8 @@ public class Reflector {
         return arrayDiff;
     }
 
-    private static MethodContainer[] getMethodContainerArray(Class<?> clazz) {
+    @NotNull
+    private static MethodContainer[] getMethodContainerArray(@NotNull Class<?> clazz) {
         var methods = clazz.getDeclaredMethods();
         MethodContainer[] methodContainers = new MethodContainer[methods.length];
         for (int i = 0 ; i < methods.length; i++) {
@@ -213,7 +236,7 @@ public class Reflector {
     private static class FieldContainer {
         private final Field field;
 
-        private FieldContainer(Field field) {
+        private FieldContainer(@NotNull Field field) {
             this.field = field;
         }
 
@@ -227,19 +250,17 @@ public class Reflector {
                 return false;
             }
             var other = (FieldContainer) obj;
-
             return field.getName().equals(other.field.getName())
                     && field.getType() == other.field.getType()
                     && Modifier.toString(field.getModifiers()).equals(Modifier.toString(other.field.getModifiers()))
                     && field.getDeclaringClass().getSimpleName().equals(other.field.getDeclaringClass().getSimpleName());
-
         }
     }
 
     private static class MethodContainer {
         private final Method method;
 
-        private MethodContainer(Method method) {
+        private MethodContainer(@NotNull Method method) {
             this.method = method;
         }
 
@@ -253,18 +274,17 @@ public class Reflector {
                 return false;
             }
             var other = (MethodContainer) obj;
-
             return method.getName().equals(other.method.getName())
                     && method.getReturnType() == other.method.getReturnType()
                     && Modifier.toString(method.getModifiers()).equals(Modifier.toString(other.method.getModifiers()))
                     && method.getDeclaringClass().getSimpleName().equals(other.method.getDeclaringClass().getSimpleName())
                     && Arrays.equals(method.getParameterTypes(), other.method.getParameterTypes())
                     && Arrays.equals(method.getExceptionTypes(), other.method.getExceptionTypes());
-
         }
     }
 
-    private static <T> List<T> diff(T[] a, T[] b) {
+    @NotNull
+    private static <T> List<T> diff(@NotNull T[] a, @NotNull T[] b) {
         var bSet = new ArrayList<>(Arrays.asList(b));
         var diff = new ArrayList<T>();
         for (var aElement : a) {
@@ -277,5 +297,4 @@ public class Reflector {
         diff.addAll(bSet);
         return diff;
     }
-
 }
