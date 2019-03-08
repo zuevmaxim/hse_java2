@@ -7,13 +7,30 @@ import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
 
+/**
+ * Class for reflection.
+ * Provide ability to print a class information without implementation.
+ */
 public class Reflector {
+    /**
+     * Print class structure without methods implementation.
+     * Makes a file `className`.java
+     * @param someClass class to print
+     * @throws IOException if input-output error occurs
+     */
     public static void  printStructure(@NotNull Class<?> someClass) throws IOException {
         try (var out = new FileWriter(someClass.getSimpleName() + ".java")) {
             recursivePrintStructure(someClass, out, 0);
         }
     }
 
+    /**
+     * Write class information recursively including subclasses.
+     * @param someClass class to write
+     * @param out file to write
+     * @param tabsNumber number of tabs
+     * @throws IOException if input-output error occurs
+     */
     private static void recursivePrintStructure(
             @NotNull Class<?> someClass,
             @NotNull FileWriter out,
@@ -44,6 +61,13 @@ public class Reflector {
 
     }
 
+    /**
+     * Write fields to a file.
+     * @param fields fields array to write
+     * @param out file to write
+     * @param tabsNumber number of tabs
+     * @throws IOException if input-output error occurs
+     */
     private static void writeFields(@NotNull Field[] fields, @NotNull FileWriter out, int tabsNumber)
             throws IOException {
         for (var field : fields) {
@@ -57,11 +81,21 @@ public class Reflector {
         }
     }
 
+    /**
+     * Returns a written type string.
+     * @param type type to print
+     * @return string with type
+     */
     @NotNull
     private static String getType(@NotNull Type type) {
         return type.getTypeName().replace('$', '.');
     }
 
+    /**
+     * Find a default value for a class.
+     * @param clazz type of a value
+     * @return "false" for boolean, "0" for primitive types, "null" otherwise
+     */
     @NotNull
     private static String getDefaultValue(@NotNull Class<?> clazz) {
         if (clazz.isPrimitive()) {
@@ -74,6 +108,13 @@ public class Reflector {
         return "null";
     }
 
+    /**
+     * Write information about constructors.
+     * @param constructors class constructors array
+     * @param out file to write
+     * @param tabsNumber number of tabs
+     * @throws IOException if input-output error occurs
+     */
     private static void writeConstructors(@NotNull Constructor[] constructors,
                                           @NotNull FileWriter out, int tabsNumber)
             throws IOException {
@@ -87,6 +128,12 @@ public class Reflector {
         }
     }
 
+    /**
+     * Write `throws` information about a method.
+     * @param exceptions array of exceptions
+     * @param out file to write
+     * @throws IOException if input-output error occurs
+     */
     private static void writeExceptions(@NotNull Type[] exceptions, @NotNull FileWriter out)
             throws IOException {
         if (exceptions.length != 0) {
@@ -99,6 +146,13 @@ public class Reflector {
         }
     }
 
+    /**
+     * Write all methods definitions.
+     * @param methods array of class methods
+     * @param out file to write
+     * @param tabsNumber number of tabs
+     * @throws IOException if input-output error occurs
+     */
     private static void writeMethods(@NotNull Method[] methods, @NotNull FileWriter out, int tabsNumber)
             throws IOException {
         for (var method : methods) {
@@ -121,12 +175,25 @@ public class Reflector {
         }
     }
 
+    /**
+     * Write tabs.
+     * @param out file to write
+     * @param tabsNumber number of tabs
+     * @throws IOException if input-output error occurs
+     */
     private static void writeTabs(@NotNull FileWriter out, int tabsNumber) throws IOException {
         for (int i = 0; i < tabsNumber; i++) {
             out.write('\t');
         }
     }
 
+    /**
+     * Write modifiers of a class/field/method.
+     * @param modifier int modifier
+     * @param out file to write
+     * @param tabsNumber number of tabs
+     * @throws IOException if input-output error occurs
+     */
     private static void writeModifiers(int modifier, @NotNull FileWriter out, int tabsNumber)
             throws IOException {
         writeTabs(out, tabsNumber);
@@ -136,6 +203,12 @@ public class Reflector {
         }
     }
 
+    /**
+     * Write parameters of a method/constructor
+     * @param parameters array of parameters
+     * @param out file to write
+     * @throws IOException if input-output error occurs
+     */
     private static void writeParameters(@NotNull Parameter[] parameters, @NotNull FileWriter out)
             throws IOException {
         if (parameters.length == 0) {
@@ -147,6 +220,12 @@ public class Reflector {
         }
     }
 
+    /**
+     * Write generic type parameters.
+     * @param clazz generic type
+     * @param out file to write
+     * @throws IOException if input-output error occurs
+     */
     private static void writeTypeParameters(@NotNull Class<?> clazz, @NotNull FileWriter out)
             throws IOException {
         var typeParameters = clazz.getTypeParameters();
@@ -159,6 +238,12 @@ public class Reflector {
         }
     }
 
+    /**
+     * Write `extends` section.
+     * @param clazz class to find information about
+     * @param out file to write
+     * @throws IOException if input-output error occurs
+     */
     private static void writeExtends(@NotNull Class<?> clazz, @NotNull FileWriter out)
             throws IOException {
         var parentClass = clazz.getSuperclass();
@@ -172,6 +257,12 @@ public class Reflector {
         }
     }
 
+    /**
+     * Write `implements` section.
+     * @param clazz class to find information about
+     * @param out file to write
+     * @throws IOException if input-output error occurs
+     */
     private static void writeImplements(@NotNull Class<?> clazz, @NotNull FileWriter out)
             throws IOException {
         var interfaces = clazz.getInterfaces();
@@ -187,12 +278,26 @@ public class Reflector {
         }
     }
 
+    /**
+     * Write difference between two classes.
+     * Write all methods and fields that differ.
+     * @param a first class
+     * @param b second class
+     * @param out file to write
+     * @throws IOException if input-output error occurs
+     */
     public static void diffClasses(@NotNull Class<?> a, @NotNull Class<?> b, @NotNull FileWriter out)
             throws IOException {
         writeFields(diffFields(a, b), out, 0);
         writeMethods(diffMethods(a, b), out, 0);
     }
 
+    /**
+     * Find fields that differ in two classes.
+     * @param a first class
+     * @param b second class
+     * @return array of fields that differ in classes
+     */
     @NotNull
     private static Field[] diffFields(@NotNull Class<?> a, @NotNull Class<?> b) {
         var diff = diff(getFieldContainerArray(a), getFieldContainerArray(b));
@@ -203,6 +308,11 @@ public class Reflector {
         return arrayDiff;
     }
 
+    /**
+     * Make and array of FieldContainers that contain fields of a given class.
+     * @param clazz class to extract fields from
+     * @return FindContainer array
+     */
     @NotNull
     private static FieldContainer[] getFieldContainerArray(@NotNull Class<?> clazz) {
         var fields = clazz.getDeclaredFields();
@@ -213,6 +323,12 @@ public class Reflector {
         return fieldContainers;
     }
 
+    /**
+     * Find methods that differ in two classes.
+     * @param a first class
+     * @param b second class
+     * @return array of methods that differ
+     */
     @NotNull
     private static Method[] diffMethods(@NotNull Class<?> a, @NotNull Class<?> b) {
         var diff = diff(getMethodContainerArray(a), getMethodContainerArray(b));
@@ -223,6 +339,11 @@ public class Reflector {
         return arrayDiff;
     }
 
+    /**
+     * Make and array of MethodContainers that contain methods of a given class.
+     * @param clazz class to extract methods from
+     * @return MethodContainer array
+     */
     @NotNull
     private static MethodContainer[] getMethodContainerArray(@NotNull Class<?> clazz) {
         var methods = clazz.getDeclaredMethods();
@@ -233,6 +354,10 @@ public class Reflector {
         return methodContainers;
     }
 
+    /**
+     * A class containing a Field.
+     * Provides equal function.
+     */
     private static class FieldContainer {
         private final Field field;
 
@@ -244,6 +369,12 @@ public class Reflector {
             return field;
         }
 
+        /**
+         * Find out if field is equal to obj.
+         * @param obj object to compare with
+         * @return true iff class where field declared,
+         * name, type, modifiers are equal for both fields
+         */
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof FieldContainer)) {
@@ -257,6 +388,10 @@ public class Reflector {
         }
     }
 
+    /**
+     * A class containing a Method,
+     * Provides equal function.
+     */
     private static class MethodContainer {
         private final Method method;
 
@@ -268,6 +403,12 @@ public class Reflector {
             return method;
         }
 
+        /**
+         * Find out if method is equal to obj.
+         * @param obj object to compare with
+         * @return true iff class where method declared, parameters, exceptions,
+         * name, return type, modifiers are equal for both fields
+         */
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof MethodContainer)) {
@@ -283,6 +424,14 @@ public class Reflector {
         }
     }
 
+    /**
+     * Find difference of two arrays.
+     * @param a first array
+     * @param b second array
+     * @param <T> type of elements
+     * @return list that contains elements of a not containing in b
+     * and elements of b not containing in a
+     */
     @NotNull
     private static <T> List<T> diff(@NotNull T[] a, @NotNull T[] b) {
         var bSet = new ArrayList<>(Arrays.asList(b));

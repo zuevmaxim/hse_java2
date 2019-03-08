@@ -76,4 +76,9 @@ public class ReflectorTest {
         test(ClassWithSubclasses.class);
     }
 
+    @Test
+    void testExtendsClass() throws IOException, ClassNotFoundException {
+        test(ClassExtends.class);
+    }
+
 }
