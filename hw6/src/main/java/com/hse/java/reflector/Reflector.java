@@ -18,7 +18,8 @@ public class Reflector {
      * @param someClass class to print
      * @throws IOException if input-output error occurs
      */
-    public static void  printStructure(@NotNull Class<?> someClass) throws IOException {
+    public static void  printStructure(@NotNull Class<?> someClass)
+            throws IOException {
         try (var out = new FileWriter(someClass.getSimpleName() + ".java")) {
             recursivePrintStructure(someClass, out, 0);
         }
@@ -68,7 +69,9 @@ public class Reflector {
      * @param tabsNumber number of tabs
      * @throws IOException if input-output error occurs
      */
-    private static void writeFields(@NotNull Field[] fields, @NotNull FileWriter out, int tabsNumber)
+    private static void writeFields(@NotNull Field[] fields,
+                                    @NotNull FileWriter out,
+                                    int tabsNumber)
             throws IOException {
         for (var field : fields) {
             writeModifiers(field.getModifiers(), out, tabsNumber + 1);
@@ -134,7 +137,8 @@ public class Reflector {
      * @param out file to write
      * @throws IOException if input-output error occurs
      */
-    private static void writeExceptions(@NotNull Type[] exceptions, @NotNull FileWriter out)
+    private static void writeExceptions(@NotNull Type[] exceptions,
+                                        @NotNull FileWriter out)
             throws IOException {
         if (exceptions.length != 0) {
             out.write("throws ");
@@ -153,7 +157,9 @@ public class Reflector {
      * @param tabsNumber number of tabs
      * @throws IOException if input-output error occurs
      */
-    private static void writeMethods(@NotNull Method[] methods, @NotNull FileWriter out, int tabsNumber)
+    private static void writeMethods(@NotNull Method[] methods,
+                                     @NotNull FileWriter out,
+                                     int tabsNumber)
             throws IOException {
         for (var method : methods) {
             writeModifiers(method.getModifiers(), out, tabsNumber + 1);
@@ -181,7 +187,8 @@ public class Reflector {
      * @param tabsNumber number of tabs
      * @throws IOException if input-output error occurs
      */
-    private static void writeTabs(@NotNull FileWriter out, int tabsNumber) throws IOException {
+    private static void writeTabs(@NotNull FileWriter out, int tabsNumber)
+            throws IOException {
         for (int i = 0; i < tabsNumber; i++) {
             out.write('\t');
         }
@@ -194,7 +201,9 @@ public class Reflector {
      * @param tabsNumber number of tabs
      * @throws IOException if input-output error occurs
      */
-    private static void writeModifiers(int modifier, @NotNull FileWriter out, int tabsNumber)
+    private static void writeModifiers(int modifier,
+                                       @NotNull FileWriter out,
+                                       int tabsNumber)
             throws IOException {
         writeTabs(out, tabsNumber);
         var stringModifier = Modifier.toString(modifier);
@@ -204,19 +213,22 @@ public class Reflector {
     }
 
     /**
-     * Write parameters of a method/constructor
+     * Write parameters of a method/constructor.
      * @param parameters array of parameters
      * @param out file to write
      * @throws IOException if input-output error occurs
      */
-    private static void writeParameters(@NotNull Parameter[] parameters, @NotNull FileWriter out)
+    private static void writeParameters(@NotNull Parameter[] parameters,
+                                        @NotNull FileWriter out)
             throws IOException {
         if (parameters.length == 0) {
             return;
         }
-        out.write(getType(parameters[0].getParameterizedType()) + " " + parameters[0].getName());
+        out.write(getType(parameters[0].getParameterizedType())
+                + " " + parameters[0].getName());
         for (int i = 1; i < parameters.length; i++) {
-            out.write(", " + getType(parameters[i].getParameterizedType()) + " " + parameters[i].getName());
+            out.write(", " + getType(parameters[i].getParameterizedType())
+                    + " " + parameters[i].getName());
         }
     }
 
@@ -226,7 +238,8 @@ public class Reflector {
      * @param out file to write
      * @throws IOException if input-output error occurs
      */
-    private static void writeTypeParameters(@NotNull Class<?> clazz, @NotNull FileWriter out)
+    private static void writeTypeParameters(@NotNull Class<?> clazz,
+                                            @NotNull FileWriter out)
             throws IOException {
         var typeParameters = clazz.getTypeParameters();
         if (typeParameters.length > 0) {
@@ -244,7 +257,8 @@ public class Reflector {
      * @param out file to write
      * @throws IOException if input-output error occurs
      */
-    private static void writeExtends(@NotNull Class<?> clazz, @NotNull FileWriter out)
+    private static void writeExtends(@NotNull Class<?> clazz,
+                                     @NotNull FileWriter out)
             throws IOException {
         var parentClass = clazz.getSuperclass();
         var parent = parentClass == null || parentClass == Object.class
@@ -263,7 +277,8 @@ public class Reflector {
      * @param out file to write
      * @throws IOException if input-output error occurs
      */
-    private static void writeImplements(@NotNull Class<?> clazz, @NotNull FileWriter out)
+    private static void writeImplements(@NotNull Class<?> clazz,
+                                        @NotNull FileWriter out)
             throws IOException {
         var interfaces = clazz.getInterfaces();
         if (interfaces.length != 0) {
@@ -286,7 +301,8 @@ public class Reflector {
      * @param out file to write
      * @throws IOException if input-output error occurs
      */
-    public static void diffClasses(@NotNull Class<?> a, @NotNull Class<?> b, @NotNull FileWriter out)
+    public static void diffClasses(@NotNull Class<?> a, @NotNull Class<?> b,
+                                   @NotNull FileWriter out)
             throws IOException {
         writeFields(diffFields(a, b), out, 0);
         writeMethods(diffMethods(a, b), out, 0);
@@ -317,7 +333,7 @@ public class Reflector {
     private static FieldContainer[] getFieldContainerArray(@NotNull Class<?> clazz) {
         var fields = clazz.getDeclaredFields();
         FieldContainer[] fieldContainers = new FieldContainer[fields.length];
-        for (int i = 0 ; i < fields.length; i++) {
+        for (int i = 0; i < fields.length; i++) {
             fieldContainers[i] = new FieldContainer(fields[i]);
         }
         return fieldContainers;
@@ -348,7 +364,7 @@ public class Reflector {
     private static MethodContainer[] getMethodContainerArray(@NotNull Class<?> clazz) {
         var methods = clazz.getDeclaredMethods();
         MethodContainer[] methodContainers = new MethodContainer[methods.length];
-        for (int i = 0 ; i < methods.length; i++) {
+        for (int i = 0; i < methods.length; i++) {
             methodContainers[i] = new MethodContainer(methods[i]);
         }
         return methodContainers;
