@@ -16,7 +16,7 @@ import java.net.URLClassLoader;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-public class ReflectorTest {
+class ReflectorTest {
 
     private void test(Class<?> clazz) throws IOException, ClassNotFoundException {
         Reflector.printStructure(clazz);
@@ -81,4 +81,13 @@ public class ReflectorTest {
         test(ClassExtends.class);
     }
 
+    @Test
+    void testConstructors() throws IOException, ClassNotFoundException {
+        test(ClassWithConstructors.class);
+    }
+
+    @Test
+    void testMethodOverload() throws IOException, ClassNotFoundException {
+        test(ClassWithMethodOverload.class);
+    }
 }

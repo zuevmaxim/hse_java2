@@ -12,6 +12,10 @@ import java.util.*;
  * Provide ability to print a class information without implementation.
  */
 public class Reflector {
+
+    /** Constructor is private because all methods are static. */
+    private Reflector() { }
+
     /**
      * Print class structure without methods implementation.
      * Makes a file `className`.java
