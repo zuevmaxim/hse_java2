@@ -13,4 +13,3 @@ env:
   - PROJECT_DIR=hw6
 
 script: cd $PROJECT_DIR && mvn install
-
