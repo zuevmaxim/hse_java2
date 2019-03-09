@@ -18,6 +18,30 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ReflectorTest {
 
+    @Test
+    void testDiff() throws IOException, ClassNotFoundException {
+        Reflector.printStructure(FirstClassTestDiff.class);
+        Class<?> first = compileAndLoad(FirstClassTestDiff.class.getSimpleName());
+        Reflector.printStructure(SecondClassTestDiff.class);
+        Class<?> second = compileAndLoad(SecondClassTestDiff.class.getSimpleName());
+        String diffFileName = "diff.txt";
+        File diffFile = new File(diffFileName);
+        try (var out = new FileWriter(diffFile)) {
+            Reflector.diffClasses(first, second, out);
+        }
+        String result;
+        try (var in = new FileReader(diffFile)) {
+            var data = new char[(int) diffFile.length()];
+            //noinspection ResultOfMethodCallIgnored
+            in.read(data);
+            result = new String(data);
+        }
+        assertEquals(result, "int x;\n"
+                + "int x;\n"
+                + "void foo() { }\n"
+                + "void boo() { }\n");
+    }
+
     private void test(Class<?> clazz) throws IOException, ClassNotFoundException {
         Reflector.printStructure(clazz);
         Class<?> other = compileAndLoad(clazz.getSimpleName());
@@ -89,5 +113,10 @@ class ReflectorTest {
     @Test
     void testMethodOverload() throws IOException, ClassNotFoundException {
         test(ClassWithMethodOverload.class);
+    }
+
+    @Test
+    void testImplements() throws IOException, ClassNotFoundException {
+        test(ClassImplements.class);
     }
 }

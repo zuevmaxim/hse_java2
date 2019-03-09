@@ -287,10 +287,10 @@ public class Reflector {
         var interfaces = clazz.getInterfaces();
         if (interfaces.length != 0) {
             out.write("implements ");
-            out.write(interfaces[0].getName());
+            out.write(interfaces[0].getCanonicalName());
             writeTypeParameters(interfaces[0], out);
             for (int i = 1; i < interfaces.length; i++) {
-                out.write(", " + interfaces[i].getName());
+                out.write(", " + interfaces[i].getCanonicalName());
                 writeTypeParameters(interfaces[i], out);
             }
             out.write(" ");
@@ -308,8 +308,8 @@ public class Reflector {
     public static void diffClasses(@NotNull Class<?> a, @NotNull Class<?> b,
                                    @NotNull FileWriter out)
             throws IOException {
-        writeFields(diffFields(a, b), out, 0);
-        writeMethods(diffMethods(a, b), out, 0);
+        writeFields(diffFields(a, b), out, -1);
+        writeMethods(diffMethods(a, b), out, -1);
     }
 
     /**
