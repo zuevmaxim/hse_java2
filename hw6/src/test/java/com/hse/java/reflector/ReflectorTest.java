@@ -36,10 +36,11 @@ class ReflectorTest {
             in.read(data);
             result = new String(data);
         }
-        assertEquals(result, "int x;\n"
+        assertEquals("int x;\n"
                 + "int x;\n"
                 + "void foo() { }\n"
-                + "void boo() { }\n");
+                + "void boo() { }\n", result
+        );
     }
 
     private void test(Class<?> clazz) throws IOException, ClassNotFoundException {

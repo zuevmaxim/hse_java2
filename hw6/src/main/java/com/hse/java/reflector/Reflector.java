@@ -63,7 +63,6 @@ public class Reflector {
 
         writeTabs(out, tabsNumber);
         out.write("}\n\n");
-
     }
 
     /**
@@ -181,7 +180,6 @@ public class Reflector {
                 writeTabs(out, tabsNumber + 1);
                 out.write("}\n");
             }
-
         }
     }
 
