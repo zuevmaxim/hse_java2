@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class provides static methods for quick sorting.
- * Realized functions for sorting int arrays or generic-type arrays.
  * Parallel sort is possible using qSortParallel method.
  */
 public class QSort {
@@ -114,7 +113,9 @@ public class QSort {
 
     private static class SortSegmentTask<T extends Comparable<? super T>>
             implements Runnable {
+        /** Tasks executor. */
         private final ExecutorService executor;
+        /** Current number of rest tasks. Flag for task execution finishing. */
         private final AtomicInteger currentNumberOfTasks;
         /** Array to sort. */
         private final T[] array;
@@ -123,6 +124,7 @@ public class QSort {
         /** End of a segment to sort. */
         private final int segmentEnd;
 
+        /** SortSegmentTask constructor. */
         private SortSegmentTask(ExecutorService executor,
                                 AtomicInteger currentNumberOfTasks,
                                 T[] array,
