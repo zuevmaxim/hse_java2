@@ -12,9 +12,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Parallel sort is possible using qSortParallel method.
  */
 public class QSort {
-    /**
-     * Constructor is private because all the methods are static.
-     */
+    /** Minimum size of segment to sort it parallel. Otherwise one thread sort is used. */
+    private static final int MIN_PARALLEL_SEGMENT_SIZE = 1000;
+
+    /** Constructor is private because all the methods are static. */
     private QSort() { }
 
     /**
@@ -99,8 +100,8 @@ public class QSort {
     public static <T extends Comparable<? super T>> void qSortParallel(
             @NotNull T[] array) throws InterruptedException {
         int numberOfThreads = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
-        AtomicInteger currentNumberOfTasks = new AtomicInteger(1);
+        var executor = Executors.newFixedThreadPool(numberOfThreads);
+        var currentNumberOfTasks = new AtomicInteger(1);
         executor.execute(new SortSegmentTask<>(executor, currentNumberOfTasks, array, 0, array.length));
         //noinspection SynchronizationOnLocalVariableOrMethodParameter
         synchronized (currentNumberOfTasks) {
@@ -115,12 +116,16 @@ public class QSort {
             implements Runnable {
         /** Tasks executor. */
         private final ExecutorService executor;
+
         /** Current number of rest tasks. Flag for task execution finishing. */
         private final AtomicInteger currentNumberOfTasks;
+
         /** Array to sort. */
         private final T[] array;
+
         /** Start of a segment to sort. */
         private final int segmentStart;
+
         /** End of a segment to sort. */
         private final int segmentEnd;
 
@@ -140,11 +145,15 @@ public class QSort {
         @Override
         public void run() {
             if (segmentEnd > segmentStart + 1) {
-                int center = partition(array, segmentStart, segmentEnd,
-                        GENERATOR.nextInt(segmentEnd - segmentStart) + segmentStart);
-                currentNumberOfTasks.addAndGet(2);
-                executor.execute(new SortSegmentTask<>(executor, currentNumberOfTasks, array, segmentStart, center));
-                executor.execute(new SortSegmentTask<>(executor, currentNumberOfTasks,array, center, segmentEnd));
+                if (segmentEnd - segmentStart < MIN_PARALLEL_SEGMENT_SIZE) {
+                    qSortRecursive(array, segmentStart, segmentEnd);
+                } else {
+                    int center = partition(array, segmentStart, segmentEnd,
+                            GENERATOR.nextInt(segmentEnd - segmentStart) + segmentStart);
+                    currentNumberOfTasks.addAndGet(2);
+                    executor.execute(new SortSegmentTask<>(executor, currentNumberOfTasks, array, segmentStart, center));
+                    executor.execute(new SortSegmentTask<>(executor, currentNumberOfTasks, array, center, segmentEnd));
+                }
             }
             if (currentNumberOfTasks.decrementAndGet() == 0) {
                 synchronized (currentNumberOfTasks) {

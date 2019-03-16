@@ -65,7 +65,7 @@ class QSortTest {
     @Test
     void findLowerBoundOfArraySizeWhenParallelSortIsFaster() throws InterruptedException {
         Integer[] array;
-        final int HUGE_SIZE = 1000000;
+        final int HUGE_SIZE = 10000000;
         int left = 1;
         int right = HUGE_SIZE;
         while (left < right - 1) {
@@ -73,7 +73,7 @@ class QSortTest {
             array = makeRandomIntegerArray(medium);
             long timeOneThread = findTimeOfSort(array);
             long timeSeveralThreads = findTimeOfParallelSort(array);
-            if (timeOneThread < timeSeveralThreads) {
+            if (timeOneThread - 100 < timeSeveralThreads) {
                 left = medium;
             } else {
                 right = medium;
@@ -120,7 +120,7 @@ class QSortTest {
 
     @NotNull
     private Integer[] makeRandomIntegerArray(int size) {
-        Integer[] array = new Integer[size];
+        var array = new Integer[size];
         for (int i = 0; i < array.length; i++) {
             array[i] = random.nextInt();
         }
