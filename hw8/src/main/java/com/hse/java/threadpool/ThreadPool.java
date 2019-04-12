@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ThreadPool {
@@ -88,7 +89,7 @@ public class ThreadPool {
         }
     }
 
-    public static class LightFuture<T> {
+    public class LightFuture<T> {
         private volatile boolean isReady = false;
         private T result;
         private RuntimeException exception;
@@ -104,7 +105,9 @@ public class ThreadPool {
                         try {
                             wait();
                         } catch (InterruptedException e) {
-                            //TODO
+                            var futureException = new LightExecutionException();
+                            futureException.addSuppressed(e);
+                            throw futureException;
                         }
                     }
                 }
@@ -115,6 +118,16 @@ public class ThreadPool {
                 throw futureException;
             }
             return result;
+        }
+
+        public <R> LightFuture<R> thenApply(Function<T, R> function) {
+            return submit(() -> {
+                try {
+                    return function.apply(get());
+                } catch (LightExecutionException e) {
+                    throw (RuntimeException) e.getSuppressed()[0];
+                }
+            });
         }
     }
 

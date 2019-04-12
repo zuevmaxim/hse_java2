@@ -81,9 +81,39 @@ class ThreadPoolTest {
     }
 
     @Test
+    void exceptionThenApplyTest() {
+        @SuppressWarnings({"divzero", "NumericOverflow"})
+        var future = threadPool.submit(() -> 5 / 0).thenApply(x -> x + 5);
+        threadPool.shutdown();
+        assertThrows(ThreadPool.LightExecutionException.class, future::get);
+        try {
+            future.get();
+        } catch (ThreadPool.LightExecutionException e) {
+            assertSame(ArithmeticException.class, e.getSuppressed()[0].getClass());
+        }
+    }
+
+    @Test
     void submitTasksAfterShutdown() {
         threadPool.shutdown();
         assertNull(threadPool.submit(() -> 0));
+    }
+
+    @Test
+    void thenApplySimpleTest() throws ThreadPool.LightExecutionException {
+        assertEquals(3, threadPool.submit(() -> 0).thenApply(x -> x + 3).get());
+        threadPool.shutdown();
+    }
+
+    @Test
+    void thenApplySequenceSimpleTest() throws ThreadPool.LightExecutionException {
+        var future1 = threadPool.submit(() -> 0);
+        var future2 = future1.thenApply(x -> x + 3);
+        var future3 = future2.thenApply(x -> x * 3);
+        threadPool.shutdown();
+        assertEquals(0, future1.get());
+        assertEquals(3, future2.get());
+        assertEquals(9, future3.get());
     }
 
     @Contract(pure = true)
