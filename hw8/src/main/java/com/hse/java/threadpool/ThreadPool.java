@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 public class ThreadPool {
     private final Worker[] threads;
     private final Queue<Task> tasks = new LinkedList<>();
+    private volatile boolean isTerminated = false;
 
     public ThreadPool(int numberOfThreads) {
         threads = new Worker[numberOfThreads];
@@ -18,8 +19,10 @@ public class ThreadPool {
         }
     }
 
-    @NotNull
     public <T> LightFuture<T> submit(@NotNull Supplier<T> supplier) {
+        if (isTerminated) {
+            return null;
+        }
         var future = new LightFuture<T>();
         var task = new Task<>(supplier, future);
         synchronized (tasks) {
@@ -36,14 +39,18 @@ public class ThreadPool {
         synchronized (tasks) {
             tasks.notifyAll();
         }
+        isTerminated = true;
     }
 
     private class Worker extends Thread {
         @Override
         public void run() {
             Task<?> task;
-            while (!Thread.interrupted()) {
+            while (!isTerminated || !tasks.isEmpty()) {
                 synchronized (tasks) {
+                    if (isTerminated && tasks.isEmpty()) {
+                        return;
+                    }
                     while (tasks.isEmpty()) {
                         try {
                             tasks.wait();

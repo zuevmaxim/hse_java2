@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,10 +35,10 @@ class ThreadPoolTest {
             int j = i;
             futures.add(threadPool.submit(() -> j));
         }
+        threadPool.shutdown();
         for (int i = 0; i < LENGTH; ++i) {
             assertEquals(i, futures.get(i).get());
         }
-        threadPool.shutdown();
     }
 
     @Test
@@ -60,27 +59,31 @@ class ThreadPoolTest {
                 return lists.get(j);
             }));
         }
+        threadPool.shutdown();
 
         for (int i = 0; i < TASK_NUMBER; i++) {
             assertTrue(isSorted(futures.get(i).get()));
+            assertTrue(futures.get(i).isReady());
         }
-        threadPool.shutdown();
-    }
-
-    @Test
-    void shutdown() {
     }
 
     @Test
     void exceptionTest() {
         @SuppressWarnings({"divzero", "NumericOverflow"})
         var future = threadPool.submit(() -> 5 / 0);
+        threadPool.shutdown();
         assertThrows(ThreadPool.LightExecutionException.class, future::get);
         try {
             future.get();
         } catch (ThreadPool.LightExecutionException e) {
             assertSame(ArithmeticException.class, e.getSuppressed()[0].getClass());
         }
+    }
+
+    @Test
+    void submitTasksAfterShutdown() {
+        threadPool.shutdown();
+        assertNull(threadPool.submit(() -> 0));
     }
 
     @Contract(pure = true)
