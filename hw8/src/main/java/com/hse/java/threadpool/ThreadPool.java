@@ -104,11 +104,7 @@ public class ThreadPool {
                     if (!isReady) {
                         try {
                             wait();
-                        } catch (InterruptedException e) {
-                            var futureException = new LightExecutionException();
-                            futureException.addSuppressed(e);
-                            throw futureException;
-                        }
+                        } catch (InterruptedException ignored) { }
                     }
                 }
             }

@@ -6,16 +6,49 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ThreadPoolTest {
     private ThreadPool threadPool;
-    private final Random random = new Random();
+    private final static Random RANDOM = new Random();
     private final static int LENGTH = 1_000_000;
     private final static int THREAD_NUMBER = 4;
     private final static int TASK_NUMBER = 8;
+    private final static List<Supplier<List<Integer>>> listTasks = new ArrayList<>();
+    private final static List<Supplier<Integer>> integerTasks = new ArrayList<>();
 
+    @BeforeEach
+    void createTasks() {
+        listTasks.clear();
+        integerTasks.clear();
+        for (int i = 0; i < TASK_NUMBER; i++) {
+            var list = getRandomIntegerList(LENGTH);
+            listTasks.add(() -> {
+                Collections.sort(list);
+                return list;
+            });
+        }
+        for (int i = 0; i < TASK_NUMBER; i++) {
+            var list = getRandomIntegerList(LENGTH);
+            listTasks.add(() -> {
+                Collections.shuffle(list);
+                return list;
+            });
+        }
+
+        for (int i = 0; i < TASK_NUMBER; i++) {
+            var list = getRandomIntegerList(LENGTH);
+            integerTasks.add(() -> list.stream().mapToInt(x -> x).sum());
+        }
+
+        for (int i = 0; i < TASK_NUMBER; i++) {
+            var list = getRandomIntegerList(LENGTH);
+            integerTasks.add(() -> Collections.max(list));
+        }
+
+    }
 
     @BeforeEach
     void setUp() {
@@ -45,10 +78,7 @@ class ThreadPoolTest {
     void submitTest() throws ThreadPool.LightExecutionException {
         List<List<Integer>> lists = new ArrayList<>();
         for (int j = 0; j < TASK_NUMBER; j++) {
-            lists.add(new ArrayList<>());
-            for (int i = 0; i < LENGTH; i++) {
-                lists.get(j).add(random.nextInt());
-            }
+            lists.add(getRandomIntegerList(LENGTH));
         }
 
         List<ThreadPool.LightFuture<List<Integer>>> futures = new ArrayList<>();
@@ -116,6 +146,49 @@ class ThreadPoolTest {
         assertEquals(9, future3.get());
     }
 
+    @Test
+    void listsSubmitTest() throws ThreadPool.LightExecutionException {
+        var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
+        for (var supplier : listTasks) {
+            futures.add(threadPool.submit(supplier));
+        }
+        threadPool.shutdown();
+        for (var future : futures) {
+            future.get();
+        }
+    }
+
+    @Test
+    void integerSubmitTest() throws ThreadPool.LightExecutionException {
+        var futures = new ArrayList<ThreadPool.LightFuture<Integer>>();
+        for (var supplier : integerTasks) {
+            futures.add(threadPool.submit(supplier));
+        }
+        threadPool.shutdown();
+        for (var future : futures) {
+            future.get();
+        }
+    }
+
+    @Test
+    void listsApplyTest() throws ThreadPool.LightExecutionException {
+        var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
+        for (var supplier : listTasks) {
+            futures.add(threadPool.submit(supplier));
+        }
+        var applyFutures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
+        for (var future : futures) {
+            applyFutures.add(future.thenApply(integers -> {
+                Collections.shuffle(integers);
+                return integers;
+            }));
+        }
+        threadPool.shutdown();
+        for (var future : applyFutures) {
+            future.get();
+        }
+    }
+
     @Contract(pure = true)
     private static <T extends Comparable<? super T>> boolean isSorted(@NotNull List<T> list) {
         T previous = null;
@@ -126,5 +199,13 @@ class ThreadPoolTest {
             previous = current;
         }
         return true;
+    }
+
+    private static List<Integer> getRandomIntegerList(int size) {
+        var list = new ArrayList<Integer>(size);
+        for (int i = 0; i < LENGTH; i++) {
+            list.add(RANDOM.nextInt(100));
+        }
+        return list;
     }
 }
