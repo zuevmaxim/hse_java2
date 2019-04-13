@@ -201,7 +201,7 @@ class ThreadPoolTest {
         return true;
     }
 
-    private static List<Integer> getRandomIntegerList(int size) {
+    private static List<Integer> getRandomIntegerList(@SuppressWarnings("SameParameterValue") int size) {
         var list = new ArrayList<Integer>(size);
         for (int i = 0; i < LENGTH; i++) {
             list.add(RANDOM.nextInt(100));
