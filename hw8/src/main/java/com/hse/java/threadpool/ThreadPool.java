@@ -21,9 +21,13 @@ public class ThreadPool {
 
     /**
      * Thread pool constructor.
-     * @param numberOfThreads the number of working threads
+     * @param numberOfThreads the number of working threads. Should be at least one.
+     * @throws IllegalArgumentException if numberOfThreads <= 0
      */
-    public ThreadPool(int numberOfThreads) {
+    public ThreadPool(int numberOfThreads) throws IllegalArgumentException {
+        if (numberOfThreads <= 0) {
+            throw new IllegalArgumentException("Number of threads should be at lest one.");
+        }
         threads = new Worker[numberOfThreads];
         for (int i = 0; i < threads.length; i++) {
             threads[i] = new Worker();

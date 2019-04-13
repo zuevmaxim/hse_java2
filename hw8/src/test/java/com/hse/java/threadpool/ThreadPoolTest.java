@@ -189,6 +189,37 @@ class ThreadPoolTest {
         }
     }
 
+    @Test
+    void oneThreadExecutionTest() throws ThreadPool.LightExecutionException {
+        threadPool = new ThreadPool(1);
+        var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
+        for (var supplier : listTasks) {
+            futures.add(threadPool.submit(supplier));
+        }
+        threadPool.shutdown();
+        for (var future : futures) {
+            future.get();
+        }
+    }
+
+    @Test
+    void manyThreadsExecutionTest() throws ThreadPool.LightExecutionException {
+        threadPool = new ThreadPool(10);
+        var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
+        for (var supplier : listTasks) {
+            futures.add(threadPool.submit(supplier));
+        }
+        threadPool.shutdown();
+        for (var future : futures) {
+            future.get();
+        }
+    }
+
+    @Test
+    void zeroThreadExceptionTest() {
+        assertThrows(IllegalArgumentException.class, () -> new ThreadPool(0));
+    }
+
     @Contract(pure = true)
     private static <T extends Comparable<? super T>> boolean isSorted(@NotNull List<T> list) {
         T previous = null;
