@@ -89,6 +89,7 @@ class ThreadPoolTest {
                 return lists.get(j);
             }));
         }
+        assertTrue(Thread.activeCount() >= THREAD_NUMBER);
         threadPool.shutdown();
 
         for (int i = 0; i < TASK_NUMBER; i++) {
@@ -152,6 +153,7 @@ class ThreadPoolTest {
         for (var supplier : listTasks) {
             futures.add(threadPool.submit(supplier));
         }
+        assertTrue(Thread.activeCount() >= THREAD_NUMBER);
         threadPool.shutdown();
         for (var future : futures) {
             future.get();
@@ -164,6 +166,7 @@ class ThreadPoolTest {
         for (var supplier : integerTasks) {
             futures.add(threadPool.submit(supplier));
         }
+        assertTrue(Thread.activeCount() >= THREAD_NUMBER);
         threadPool.shutdown();
         for (var future : futures) {
             future.get();
@@ -183,6 +186,7 @@ class ThreadPoolTest {
                 return integers;
             }));
         }
+        assertTrue(Thread.activeCount() >= THREAD_NUMBER);
         threadPool.shutdown();
         for (var future : applyFutures) {
             future.get();
@@ -196,6 +200,7 @@ class ThreadPoolTest {
         for (var supplier : listTasks) {
             futures.add(threadPool.submit(supplier));
         }
+        assertTrue(Thread.activeCount() >= 1);
         threadPool.shutdown();
         for (var future : futures) {
             future.get();
@@ -209,6 +214,7 @@ class ThreadPoolTest {
         for (var supplier : listTasks) {
             futures.add(threadPool.submit(supplier));
         }
+        assertTrue(Thread.activeCount() >= 10);
         threadPool.shutdown();
         for (var future : futures) {
             future.get();
