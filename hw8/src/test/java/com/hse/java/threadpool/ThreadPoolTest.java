@@ -76,12 +76,12 @@ class ThreadPoolTest {
 
     @Test
     void submitTest() throws ThreadPool.LightExecutionException {
-        List<List<Integer>> lists = new ArrayList<>();
+        var lists = new ArrayList<List<Integer>>();
         for (int j = 0; j < TASK_NUMBER; j++) {
             lists.add(getRandomIntegerList(LENGTH));
         }
 
-        List<ThreadPool.LightFuture<List<Integer>>> futures = new ArrayList<>();
+        var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
         for (int i = 0; i < TASK_NUMBER; i++) {
             final int j = i;
             futures.add(threadPool.submit(() -> {

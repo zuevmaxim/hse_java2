@@ -43,6 +43,7 @@ public class ThreadPool {
      * when task will be done.
      * @throws IllegalStateException if shutdown() method had been called before
      */
+    @NotNull
     public <T> LightFuture<T> submit(@NotNull Supplier<T> supplier) throws IllegalStateException {
         if (isTerminated) {
             throw new IllegalStateException("Task submitting had been terminated.");
@@ -61,7 +62,7 @@ public class ThreadPool {
      * New tasks cannot be submitted, but the others will be executed.
      */
     public void shutdown() {
-        for (Worker thread : threads) {
+        for (var thread : threads) {
             thread.interrupt();
         }
         synchronized (tasks) {
@@ -183,6 +184,7 @@ public class ThreadPool {
          * @param <R> type of a result of a new task
          * @return LightFuture object that will contain result
          */
+        @NotNull
         public <R> LightFuture<R> thenApply(Function<T, R> function) {
             return submit(() -> {
                 try {
