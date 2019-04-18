@@ -127,7 +127,7 @@ class ThreadPoolTest {
     @Test
     void submitTasksAfterShutdown() {
         threadPool.shutdown();
-        assertNull(threadPool.submit(() -> 0));
+        assertThrows(IllegalStateException.class, () -> threadPool.submit(() -> 0));
     }
 
     @Test
