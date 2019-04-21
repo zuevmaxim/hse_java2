@@ -2,7 +2,9 @@ package com.hse.java.threadpool;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -84,6 +86,17 @@ public class ThreadPool {
     }
 
     /**
+     * Submit a task without creating.
+     * @param task task to submit
+     */
+    private void submit(@NotNull Task<?> task) {
+        synchronized (tasks) {
+            tasks.add(task);
+            tasks.notify();
+        }
+    }
+
+    /**
      * Terminate thread pool working.
      * New tasks cannot be submitted, but the others will be executed.
      * Wait until all the submitted tasks will be done.
@@ -137,7 +150,10 @@ public class ThreadPool {
                 } catch (RuntimeException e) {
                     future.exception = e;
                 }
-                future.isReady = true;
+                synchronized (future.isReady) {
+                    future.isReady.set(true);
+                    future.submitThenApplyTasks();
+                }
                 future.notify();
             }
         }
@@ -150,7 +166,7 @@ public class ThreadPool {
      */
     public class LightFuture<T> {
         /** A flag if the task is executed. */
-        private volatile boolean isReady = false;
+        private final AtomicBoolean isReady = new AtomicBoolean(false);
 
         /** Result value. */
         private T result;
@@ -158,9 +174,12 @@ public class ThreadPool {
         /** Exception that occurs while task execution. */
         private RuntimeException exception;
 
+        /** List of then apply tasks. */
+        private List<Task<?>> taskList = new ArrayList<>();
+
         /** Return true iff task is executed. */
         public boolean isReady() {
-            return isReady;
+            return isReady.get();
         }
 
         /**
@@ -170,9 +189,9 @@ public class ThreadPool {
          * while task execution.
          */
         public T get() throws LightExecutionException {
-            while (!isReady) {
+            while (!isReady.get()) {
                 synchronized (this) {
-                    if (!isReady) {
+                    if (!isReady.get()) {
                         try {
                             wait();
                         } catch (InterruptedException ignored) { }
@@ -196,13 +215,29 @@ public class ThreadPool {
          */
         @NotNull
         public <R> LightFuture<R> thenApply(Function<? super T, R> function) {
-            return submit(() -> {
+            Supplier<R> supplier = () -> {
                 try {
                     return function.apply(get());
                 } catch (LightExecutionException e) {
                     throw (RuntimeException) e.getSuppressed()[0];
                 }
-            });
+            };
+            synchronized (isReady) {
+                if (isReady.get()) {
+                    return submit(supplier);
+                }
+                var future = new LightFuture<R>();
+                taskList.add(new Task<>(supplier, future));
+                return future;
+            }
+        }
+
+        /** Submit all the tasks waiting for this task end. */
+        private void submitThenApplyTasks() {
+            for (var task : taskList) {
+                submit(task);
+            }
+            taskList = null;
         }
     }
 
