@@ -13,9 +13,11 @@ import java.util.function.Supplier;
  */
 public class ThreadPool {
     /** Array of working threads. */
-    private final Worker[] threads;
+    private final Thread[] threads;
+
     /** Queue of tasks to execute. */
     private final Queue<Task> tasks = new LinkedList<>();
+
     /** Flag shows if thread pool work should be terminated. */
     private volatile boolean isTerminated = false;
 
@@ -28,9 +30,30 @@ public class ThreadPool {
         if (numberOfThreads <= 0) {
             throw new IllegalArgumentException("Number of threads should be at lest one.");
         }
-        threads = new Worker[numberOfThreads];
+        threads = new Thread[numberOfThreads];
+
+        Runnable workingCycle = () -> {
+            Task<?> task;
+            while (!isTerminated || !tasks.isEmpty()) {
+                synchronized (tasks) {
+                    if (isTerminated && tasks.isEmpty()) {
+                        return;
+                    }
+                    while (tasks.isEmpty()) {
+                        try {
+                            tasks.wait();
+                        } catch (InterruptedException e) {
+                            return;
+                        }
+                    }
+                    task = tasks.poll();
+                }
+                task.run();
+            }
+        };
+
         for (int i = 0; i < threads.length; i++) {
-            threads[i] = new Worker();
+            threads[i] = new Thread(workingCycle);
             threads[i].start();
         }
     }
@@ -72,41 +95,13 @@ public class ThreadPool {
     }
 
     /**
-     * Worker is a class, implements working process
-     * of a thread from thread pool.
-     * Every worker is waiting for tasks in the queue and executes them.
-     */
-    private class Worker extends Thread {
-        /** Thread working cycle. */
-        @Override
-        public void run() {
-            Task<?> task;
-            while (!isTerminated || !tasks.isEmpty()) {
-                synchronized (tasks) {
-                    if (isTerminated && tasks.isEmpty()) {
-                        return;
-                    }
-                    while (tasks.isEmpty()) {
-                        try {
-                            tasks.wait();
-                        } catch (InterruptedException e) {
-                            return;
-                        }
-                    }
-                    task = tasks.poll();
-                }
-                task.run();
-            }
-        }
-    }
-
-    /**
-     * Task that workers execute.
+     * Task that threads execute.
      * @param <T> type of the result
      */
     private static class Task<T> implements Runnable {
         /** Task to execute. */
         private final Supplier<T> supplier;
+
         /** Save the result when is ready. */
         private final LightFuture<T> future;
 
@@ -143,8 +138,10 @@ public class ThreadPool {
     public class LightFuture<T> {
         /** A flag if the task is executed. */
         private volatile boolean isReady = false;
+
         /** Result value. */
         private T result;
+
         /** Exception that occurs while task execution. */
         private RuntimeException exception;
 
