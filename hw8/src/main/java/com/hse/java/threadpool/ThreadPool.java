@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -19,7 +20,7 @@ public class ThreadPool {
     private final Queue<Task> tasks = new LinkedList<>();
 
     /** Flag shows if thread pool work should be terminated. */
-    private volatile boolean isTerminated = false;
+    private final AtomicBoolean isTerminated = new AtomicBoolean(false);
 
     /**
      * Thread pool constructor.
@@ -34,9 +35,9 @@ public class ThreadPool {
 
         Runnable workingCycle = () -> {
             Task<?> task;
-            while (!isTerminated || !tasks.isEmpty()) {
+            while (!isTerminated.get() || !tasks.isEmpty()) {
                 synchronized (tasks) {
-                    if (isTerminated && tasks.isEmpty()) {
+                    if (isTerminated.get() && tasks.isEmpty()) {
                         return;
                     }
                     while (tasks.isEmpty()) {
@@ -68,16 +69,18 @@ public class ThreadPool {
      */
     @NotNull
     public <T> LightFuture<T> submit(@NotNull Supplier<T> supplier) throws IllegalStateException {
-        if (isTerminated) {
-            throw new IllegalStateException("Task submitting had been terminated.");
+        synchronized (isTerminated) {
+            if (isTerminated.get()) {
+                throw new IllegalStateException("Task submitting had been terminated.");
+            }
+            var future = new LightFuture<T>();
+            var task = new Task<>(supplier, future);
+            synchronized (tasks) {
+                tasks.add(task);
+                tasks.notify();
+            }
+            return future;
         }
-        var future = new LightFuture<T>();
-        var task = new Task<>(supplier, future);
-        synchronized (tasks) {
-            tasks.add(task);
-            tasks.notify();
-        }
-        return future;
     }
 
     /**
@@ -87,7 +90,9 @@ public class ThreadPool {
      * @throws InterruptedException if waiting is interrupted
      */
     public void shutdown() throws InterruptedException {
-        isTerminated = true;
+        synchronized (isTerminated) {
+            isTerminated.set(true);
+        }
 
         for (var thread : threads) {
             thread.interrupt();
@@ -190,7 +195,7 @@ public class ThreadPool {
          * @return LightFuture object that will contain result
          */
         @NotNull
-        public <R> LightFuture<R> thenApply(Function<T, R> function) {
+        public <R> LightFuture<R> thenApply(Function<? super T, R> function) {
             return submit(() -> {
                 try {
                     return function.apply(get());
