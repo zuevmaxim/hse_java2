@@ -56,13 +56,13 @@ class ThreadPoolTest {
     }
 
     @Test
-    void simpleTestOneTask() throws ThreadPool.LightExecutionException {
+    void simpleTestOneTask() throws ThreadPool.LightExecutionException, InterruptedException {
         assertEquals(0, threadPool.submit(() -> 0).get());
         threadPool.shutdown();
     }
 
     @Test
-    void simpleTestManyTasks() throws ThreadPool.LightExecutionException {
+    void simpleTestManyTasks() throws ThreadPool.LightExecutionException, InterruptedException {
         List<ThreadPool.LightFuture> futures = new ArrayList<>();
         for (int i = 0; i < LENGTH; i++) {
             int j = i;
@@ -75,7 +75,7 @@ class ThreadPoolTest {
     }
 
     @Test
-    void submitTest() throws ThreadPool.LightExecutionException {
+    void submitTest() throws ThreadPool.LightExecutionException, InterruptedException {
         var lists = new ArrayList<List<Integer>>();
         for (int j = 0; j < TASK_NUMBER; j++) {
             lists.add(getRandomIntegerList(LENGTH));
@@ -93,13 +93,14 @@ class ThreadPoolTest {
         threadPool.shutdown();
 
         for (int i = 0; i < TASK_NUMBER; i++) {
+            assertTrue(futures.get(i).isReady());
             assertTrue(isSorted(futures.get(i).get()));
             assertTrue(futures.get(i).isReady());
         }
     }
 
     @Test
-    void exceptionTest() {
+    void exceptionTest() throws InterruptedException {
         @SuppressWarnings({"divzero", "NumericOverflow"})
         var future = threadPool.submit(() -> 5 / 0);
         threadPool.shutdown();
@@ -112,7 +113,7 @@ class ThreadPoolTest {
     }
 
     @Test
-    void exceptionThenApplyTest() {
+    void exceptionThenApplyTest() throws InterruptedException {
         @SuppressWarnings({"divzero", "NumericOverflow"})
         var future = threadPool.submit(() -> 5 / 0).thenApply(x -> x + 5);
         threadPool.shutdown();
@@ -125,19 +126,19 @@ class ThreadPoolTest {
     }
 
     @Test
-    void submitTasksAfterShutdown() {
+    void submitTasksAfterShutdown() throws InterruptedException {
         threadPool.shutdown();
         assertThrows(IllegalStateException.class, () -> threadPool.submit(() -> 0));
     }
 
     @Test
-    void thenApplySimpleTest() throws ThreadPool.LightExecutionException {
+    void thenApplySimpleTest() throws ThreadPool.LightExecutionException, InterruptedException {
         assertEquals(3, threadPool.submit(() -> 0).thenApply(x -> x + 3).get());
         threadPool.shutdown();
     }
 
     @Test
-    void thenApplySequenceSimpleTest() throws ThreadPool.LightExecutionException {
+    void thenApplySequenceSimpleTest() throws ThreadPool.LightExecutionException, InterruptedException {
         var future1 = threadPool.submit(() -> 0);
         var future2 = future1.thenApply(x -> x + 3);
         var future3 = future2.thenApply(x -> x * 3);
@@ -148,7 +149,7 @@ class ThreadPoolTest {
     }
 
     @Test
-    void listsSubmitTest() throws ThreadPool.LightExecutionException {
+    void listsSubmitTest() throws ThreadPool.LightExecutionException, InterruptedException {
         var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
         for (var supplier : listTasks) {
             futures.add(threadPool.submit(supplier));
@@ -161,7 +162,7 @@ class ThreadPoolTest {
     }
 
     @Test
-    void integerSubmitTest() throws ThreadPool.LightExecutionException {
+    void integerSubmitTest() throws ThreadPool.LightExecutionException, InterruptedException {
         var futures = new ArrayList<ThreadPool.LightFuture<Integer>>();
         for (var supplier : integerTasks) {
             futures.add(threadPool.submit(supplier));
@@ -174,7 +175,7 @@ class ThreadPoolTest {
     }
 
     @Test
-    void listsApplyTest() throws ThreadPool.LightExecutionException {
+    void listsApplyTest() throws ThreadPool.LightExecutionException, InterruptedException {
         var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
         for (var supplier : listTasks) {
             futures.add(threadPool.submit(supplier));
@@ -194,7 +195,7 @@ class ThreadPoolTest {
     }
 
     @Test
-    void oneThreadExecutionTest() throws ThreadPool.LightExecutionException {
+    void oneThreadExecutionTest() throws ThreadPool.LightExecutionException, InterruptedException {
         threadPool = new ThreadPool(1);
         var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
         for (var supplier : listTasks) {
@@ -208,7 +209,7 @@ class ThreadPoolTest {
     }
 
     @Test
-    void manyThreadsExecutionTest() throws ThreadPool.LightExecutionException {
+    void manyThreadsExecutionTest() throws ThreadPool.LightExecutionException, InterruptedException {
         threadPool = new ThreadPool(10);
         var futures = new ArrayList<ThreadPool.LightFuture<List<Integer>>>();
         for (var supplier : listTasks) {
@@ -224,6 +225,17 @@ class ThreadPoolTest {
     @Test
     void zeroThreadExceptionTest() {
         assertThrows(IllegalArgumentException.class, () -> new ThreadPool(0));
+    }
+
+    @Test
+    void shutdownTest() throws InterruptedException {
+        var future = threadPool.submit(() -> {
+            //noinspection StatementWithEmptyBody
+            for (int i = 0; i < LENGTH; i++);
+            return 0;
+        });
+        threadPool.shutdown();
+        assertTrue(future.isReady());
     }
 
     @Contract(pure = true)

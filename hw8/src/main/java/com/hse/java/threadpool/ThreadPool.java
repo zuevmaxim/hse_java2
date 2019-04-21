@@ -83,15 +83,23 @@ public class ThreadPool {
     /**
      * Terminate thread pool working.
      * New tasks cannot be submitted, but the others will be executed.
+     * Wait until all the submitted tasks will be done.
+     * @throws InterruptedException if waiting is interrupted
      */
-    public void shutdown() {
+    public void shutdown() throws InterruptedException {
+        isTerminated = true;
+
         for (var thread : threads) {
             thread.interrupt();
         }
+
         synchronized (tasks) {
             tasks.notifyAll();
         }
-        isTerminated = true;
+
+        for (var thread : threads) {
+            thread.join();
+        }
     }
 
     /**
