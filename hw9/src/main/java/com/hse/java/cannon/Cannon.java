@@ -61,6 +61,12 @@ public class Cannon {
     public Point getNewTarget() {
         isTargetArchived = false;
         double x = RANDOM.nextInt(90) + 5;
+        if (target != null) {
+            double previousX = target.getX();
+            while (Math.abs(x - previousX) < 5) {
+                x = RANDOM.nextInt(90) + 5;
+            }
+        }
         target = new Point(x, Landscape.getY(x));
         return new Point(target);
     }

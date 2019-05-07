@@ -3,8 +3,13 @@ package com.hse.java.cannon;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -14,13 +19,20 @@ import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CannonUI extends Application {
-    private Cannon cannon = new Cannon(55);
-
-    private final Pane pane = new Pane();
-    private Circle target;
+    private final AtomicBoolean isTargetArchived = new AtomicBoolean(false);
     private int bombSize = 5;
+    private int score = 0;
+
+    private Cannon cannon = new Cannon(55);
+    private final Pane pane = new Pane();
+    private final Scene scene = new Scene(pane, WIDTH, HEIGHT);
+    private Circle target;
+    private final Label scoreText = new Label();
+    private Tank tank;
+
 
     private static final double HEIGHT = 600;
     private static final double WIDTH = 600;
@@ -34,12 +46,6 @@ public class CannonUI extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        var tank = new Tank(0, 0, TANK_WIDTH, TANK_HEIGHT);
-        tank.set(cannon.getState());
-        pane.getChildren().addAll(tank, tank.barrel);
-
-        var scene = new Scene(pane, WIDTH, HEIGHT);
-        scene.setOnKeyPressed(tank);
         primaryStage.setScene(scene);
 
         var mountains = new ArrayList<Line>();
@@ -54,18 +60,71 @@ public class CannonUI extends Application {
                     getYFromPerCent(nextY)));
         }
 
-        pane.getChildren().addAll(mountains);
+        scoreText.setLayoutX(WIDTH - 100);
+        scoreText.setLayoutY(HEIGHT - 100);
 
-        makeTarget();
+        pane.getChildren().addAll(mountains);
+        pane.getChildren().add(scoreText);
+
+        var endGameButton = new Button("End game.");
+        endGameButton.setLayoutX(WIDTH - 100);
+        endGameButton.setLayoutY(HEIGHT - 50);
+        pane.getChildren().add(endGameButton);
+        endGameButton.setOnAction(event -> endGame());
+        endGameButton.setFocusTraversable(false);
+
+        startGame();
 
         primaryStage.setResizable(false);
         primaryStage.show();
+    }
+
+    private void setScoreText() {
+        scoreText.setText("Score: " + score);
+    }
+
+    private void startGame() {
+        score = 0;
+        setScoreText();
+        tank = new Tank(0, 0, TANK_WIDTH, TANK_HEIGHT);
+        tank.set(cannon.getState());
+        pane.getChildren().addAll(tank, tank.barrel);
+        scene.setOnKeyPressed(tank);
+        makeTarget();
+    }
+
+    private void endGame() {
+        pane.getChildren().removeAll(tank, tank.barrel);
+        var result = new Label("Your score: " + score);
+        var layout = new FlowPane();
+        layout.setOrientation(Orientation.VERTICAL);
+        layout.setVgap(8);
+        layout.setHgap(4);
+        layout.setPadding(new Insets(15,15,15,15));
+
+
+        var scene = new Scene(layout, 200, 300);
+        var newWindow = new Stage();
+        newWindow.setTitle("Game over");
+        newWindow.setScene(scene);
+
+        var newGameButton = new Button("Start game");
+        newGameButton.setOnAction(event -> {
+            newWindow.close();
+            startGame();
+        });
+
+        var exitButton = new Button("Exit");
+        exitButton.setOnAction(event -> Platform.exit());
+        layout.getChildren().addAll(result, newGameButton, exitButton);
+        newWindow.show();
     }
 
     private void makeTarget() {
         if (target != null) {
             pane.getChildren().remove(target);
         }
+        isTargetArchived.set(false);
         var targetPoint = cannon.getNewTarget();
         target = new Circle(
                 getXFromPerCent(targetPoint.getX()),
@@ -86,12 +145,13 @@ public class CannonUI extends Application {
 
         @Override
         public void handle(KeyEvent event) {
+            double k = Math.max(1, Math.abs(cannon.getState().getAngle()) / 10);
             switch (event.getCode()) {
                 case LEFT:
-                    cannon.move(-STEP_SIZE);
+                    cannon.move(-STEP_SIZE / k);
                     break;
                 case RIGHT:
-                    cannon.move(STEP_SIZE);
+                    cannon.move(STEP_SIZE / k);
                     break;
                 case UP:
                     cannon.moveBarrel(BARREL_STEP_SIZE);
@@ -116,27 +176,44 @@ public class CannonUI extends Application {
                                 getYFromPerCent(point.getY()),
                                 size,
                                 Color.RED);
-                        Platform.runLater(() -> pane.getChildren().add(circle));
-                        while (point != null && !cannon.isTargetArchived()) {
+                        boolean invisible = false;
+                        final Runnable addCircle = () -> pane.getChildren().add(circle);
+                        final Runnable removeCircle = () -> pane.getChildren().remove(circle);
+                        Platform.runLater(addCircle);
+                        while (point != null) {
                             circle.setCenterX(getXFromPerCent(point.getX()));
-                            circle.setCenterY(getYFromPerCent(point.getY()));
+                            double y = getYFromPerCent(point.getY());
+                            if (y >= 0) {
+                                if (invisible) {
+                                    invisible = false;
+                                    Platform.runLater(addCircle);
+                                }
+                                circle.setCenterY(y);
+                            } else {
+                                if (!invisible) {
+                                    invisible = true;
+                                    Platform.runLater(removeCircle);
+                                }
+                            }
                             t += 0.1 - 0.07 / size;
                             point = f.apply(t);
+                            if (cannon.isTargetArchived() && isTargetArchived.compareAndSet(false, true)) {
+                                score++;
+                                Platform.runLater(CannonUI.this::setScoreText);
+                                for (double i = size; i <= 2.5 * size; i += 0.2) {
+                                    circle.setRadius(i);
+                                    try {
+                                        Thread.sleep(50 / size);
+                                    } catch (InterruptedException ignored) { }
+                                }
+                                Platform.runLater(CannonUI.this::makeTarget);
+                                break;
+                            }
                             try {
                                 Thread.sleep(50);
                             } catch (InterruptedException ignored) { }
                         }
-                        if (cannon.isTargetArchived()) {
-                            for (double i = size; i <= 2.5 * size; i += 0.2) {
-                                circle.setRadius(i);
-                                try {
-                                    Thread.sleep(50 / size);
-                                } catch (InterruptedException ignored) { }
-                            }
-                            Platform.runLater(CannonUI.this::makeTarget);
-                        }
-
-                        Platform.runLater(() -> pane.getChildren().remove(circle));
+                        Platform.runLater(removeCircle);
                     };
                     new Thread(task).start();
                     break;
@@ -152,7 +229,6 @@ public class CannonUI extends Application {
         private void set(Cannon.CannonState state) {
             double alpha = state.getAngle();
             double gamma = alpha - betta;
-            @SuppressWarnings("SuspiciousNameCombination")
             double d = Math.sqrt(MyMath.sqr(TANK_HEIGHT) + MyMath.sqr(TANK_WIDTH / 2));
             setX(getXFromPerCent(state.getX()) - d * Math.cos(Math.toRadians(gamma)));
             setY(getYFromPerCent(state.getY()) + d * Math.sin(Math.toRadians(gamma)));
@@ -192,7 +268,6 @@ public class CannonUI extends Application {
     }
 
     private double getYFromPerCent(double y) {
-        assert 0 <= y && y <= 100;
         return HEIGHT - y / 100 * HEIGHT;
     }
 
