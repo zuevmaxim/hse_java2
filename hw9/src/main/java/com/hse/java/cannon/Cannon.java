@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.function.Function;
 
 public class Cannon {
-    private CannonState state;
+    private final CannonState state;
     private Point target;
     private boolean isTargetArchived = false;
     private static final Random RANDOM = new Random();
@@ -36,11 +36,11 @@ public class Cannon {
         state.barrelAngle += delta;
     }
 
-    public Function<Double, Point> fire(int size, double distance, double barrelLength) {
+    public Function<Double, Point> fire(int size, double distance, Point barrelEnding) {
         final double angle = Math.toRadians(state.angle + 90 - state.barrelAngle);
-        final double x0 = state.x + barrelLength * Math.cos(angle);
-        final double y0 = state.y + barrelLength * Math.sin(angle);
-        final double v0 = 100.0 / size ;
+        final double x0 = barrelEnding.getX();
+        final double y0 = barrelEnding.getY();
+        final double v0 = 50.0 / size + 10;
         final Cannon cannon = this;
         return (t) -> {
           assert t >= 0;
@@ -60,7 +60,7 @@ public class Cannon {
 
     public Point getNewTarget() {
         isTargetArchived = false;
-        double x = RANDOM.nextInt(100);
+        double x = RANDOM.nextInt(90) + 5;
         target = new Point(x, Landscape.getY(x));
         return new Point(target);
     }

@@ -10,28 +10,27 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
 
 public class CannonUI extends Application {
-    private Cannon cannon = new Cannon(65);
+    private Cannon cannon = new Cannon(55);
 
     private final Pane pane = new Pane();
     private Circle target;
+    private int bombSize = 5;
 
-
-    private static final int HEIGHT = 500;
-    private static final int WIDTH = 600;
+    private static final double HEIGHT = 600;
+    private static final double WIDTH = 600;
     private static final double STEP_SIZE = 1.0;
     private static final double TANK_HEIGHT = 10;
     private static final double TANK_WIDTH = 30;
     private static final double TARGET_SIZE = 5;
-    private static final double BARREL_STEP_SIZE = 3.0;
+    private static final double BARREL_STEP_SIZE = 2.0;
     private static final double BARREL_HEIGHT = 3;
     private static final double BARREL_WIDTH = 25;
-
-    private int bombSize = 5;
 
     @Override
     public void start(Stage primaryStage) {
@@ -72,7 +71,7 @@ public class CannonUI extends Application {
                 getXFromPerCent(targetPoint.getX()),
                 getYFromPerCent(targetPoint.getY()),
                 TARGET_SIZE,
-                Color.DARKORANGE);
+                Color.BLACK);
         pane.getChildren().add(target);
     }
 
@@ -104,8 +103,8 @@ public class CannonUI extends Application {
                     final int size = bombSize;
                     final var f = cannon.fire(
                             size,
-                            ((double) size + TARGET_SIZE) / HEIGHT * 100,
-                            100.0 * BARREL_WIDTH / HEIGHT);
+                            (2.0 * size + TARGET_SIZE) / HEIGHT * 100,
+                            getBarrelEnding(cannon.getState()));
                     Runnable task = () -> {
                         double t = 0.0;
                         Point point = f.apply(t);
@@ -121,14 +120,14 @@ public class CannonUI extends Application {
                         while (point != null && !cannon.isTargetArchived()) {
                             circle.setCenterX(getXFromPerCent(point.getX()));
                             circle.setCenterY(getYFromPerCent(point.getY()));
-                            t += 0.1;
+                            t += 0.1 - 0.07 / size;
                             point = f.apply(t);
                             try {
-                                Thread.sleep(100);
+                                Thread.sleep(50);
                             } catch (InterruptedException ignored) { }
                         }
                         if (cannon.isTargetArchived()) {
-                            for (double i = size; i <= 3 * size; i += 0.2) {
+                            for (double i = size; i <= 2.5 * size; i += 0.2) {
                                 circle.setRadius(i);
                                 try {
                                     Thread.sleep(50 / size);
@@ -139,32 +138,45 @@ public class CannonUI extends Application {
 
                         Platform.runLater(() -> pane.getChildren().remove(circle));
                     };
-                    var thread = new Thread(task);
-                    thread.start();
+                    new Thread(task).start();
                     break;
             }
-            if (!event.getText().isEmpty() && Character.isDigit(event.getText().charAt(0))) {
+            if (!event.getText().isEmpty() && Character.isDigit(event.getText().charAt(0)) && event.getText().charAt(0) != '0') {
                 bombSize = Integer.parseInt(event.getText());
             }
             set(cannon.getState());
         }
 
-
+        private final double betta = Math.toDegrees(Math.atan(TANK_HEIGHT / (TANK_WIDTH / 2)));
 
         private void set(Cannon.CannonState state) {
-            double tankAngle = Math.abs(Math.abs(state.getAngle()) - Math.toDegrees(Math.atan(TANK_HEIGHT / TANK_WIDTH)));
+            double alpha = state.getAngle();
+            double gamma = alpha - betta;
             @SuppressWarnings("SuspiciousNameCombination")
-            double d = Math.sqrt(MyMath.sqr(TANK_HEIGHT) + MyMath.sqr(TANK_WIDTH)) / 2;
-
-            setRotate(-state.getAngle());
-            setX(getXFromPerCent(state.getX()) - d * Math.cos(Math.toRadians(tankAngle)));
-            setY(getYFromPerCent(state.getY()) - d * Math.sin(Math.toRadians(tankAngle)));
-
+            double d = Math.sqrt(MyMath.sqr(TANK_HEIGHT) + MyMath.sqr(TANK_WIDTH / 2));
+            setX(getXFromPerCent(state.getX()) - d * Math.cos(Math.toRadians(gamma)));
+            setY(getYFromPerCent(state.getY()) + d * Math.sin(Math.toRadians(gamma)));
+            getTransforms().clear();
+            getTransforms().add(new Rotate(-state.getAngle(), getX(), getY()));
 
             double barrelAngle = state.getAngle() + 90 - state.getBarrelAngle();
-            barrel.setRotate(-barrelAngle);
-            barrel.setX(getX() + BARREL_WIDTH / 2 * Math.cos(Math.toRadians(barrelAngle)));
-            barrel.setY(getY() - BARREL_WIDTH / 2 * Math.sin(Math.toRadians(barrelAngle)));
+            double barrelX = getXFromPerCent(state.getX()) - TANK_HEIGHT * Math.sin(Math.toRadians(alpha));
+            double barrelY = getYFromPerCent(state.getY()) - TANK_HEIGHT * Math.cos(Math.toRadians(alpha));
+            barrel.setX(barrelX - BARREL_HEIGHT / 2 * Math.sin(Math.toRadians(barrelAngle)));
+            barrel.setY(barrelY + BARREL_HEIGHT / 2 * Math.cos(Math.toRadians(barrelAngle)));
+            var barrelRotate = new Rotate(-barrelAngle, barrelX, barrelY);
+            barrel.getTransforms().clear();
+            barrel.getTransforms().add(barrelRotate);
+        }
+
+        private Point getBarrelEnding(Cannon.CannonState state) {
+            double alpha = state.getAngle() + 90 - state.getBarrelAngle();
+            double betta = Math.toDegrees(Math.atan((BARREL_HEIGHT / 2) / BARREL_WIDTH));
+            double gamma = alpha - betta;
+            double d = Math.sqrt(MyMath.sqr(BARREL_WIDTH) + MyMath.sqr(BARREL_HEIGHT / 2));
+            double x = getXInPerCent(barrel.getX() + d * Math.cos(Math.toRadians(gamma)));
+            double y = getYInPerCent(barrel.getY() - d * Math.sin(Math.toRadians(gamma)));
+            return new Point(x, y);
         }
 
         private class Barrel extends Rectangle {
@@ -173,7 +185,6 @@ public class CannonUI extends Application {
                 setFill(Color.BLACK);
             }
         }
-
     }
 
     private double getXFromPerCent(double x) {
@@ -183,5 +194,13 @@ public class CannonUI extends Application {
     private double getYFromPerCent(double y) {
         assert 0 <= y && y <= 100;
         return HEIGHT - y / 100 * HEIGHT;
+    }
+
+    private double getXInPerCent(double x) {
+        return x * 100 / WIDTH;
+    }
+
+    private double getYInPerCent(double y) {
+        return (HEIGHT - y) * 100 / HEIGHT;
     }
 }
