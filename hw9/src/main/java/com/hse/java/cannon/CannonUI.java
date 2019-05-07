@@ -92,13 +92,14 @@ public class CannonUI extends Application {
         progressBar.setProgress(1);
         timerThread = new Thread(() -> {
             int timeLeft = GAME_TIME;
+            final int k = 2;
             while (timeLeft > 0) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(k * 1000);
                 } catch (InterruptedException e) {
                     return;
                 }
-                timeLeft--;
+                timeLeft -= k;
                 progressBar.setProgress(timeLeft / (double) GAME_TIME);
             }
             Platform.runLater(this::endGame);
