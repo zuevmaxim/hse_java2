@@ -8,6 +8,7 @@ import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
@@ -25,14 +26,15 @@ public class CannonUI extends Application {
     private final AtomicBoolean isTargetArchived = new AtomicBoolean(false);
     private int bombSize = 5;
     private int score = 0;
+    private Thread timerThread;
 
-    private Cannon cannon = new Cannon(55);
+    private final Cannon cannon = new Cannon(55);
     private final Pane pane = new Pane();
     private final Scene scene = new Scene(pane, WIDTH, HEIGHT);
     private Circle target;
     private final Label scoreText = new Label();
     private Tank tank;
-
+    private final ProgressBar progressBar = new ProgressBar(1);
 
     private static final double HEIGHT = 600;
     private static final double WIDTH = 600;
@@ -43,6 +45,7 @@ public class CannonUI extends Application {
     private static final double BARREL_STEP_SIZE = 2.0;
     private static final double BARREL_HEIGHT = 3;
     private static final double BARREL_WIDTH = 25;
+    private static final int GAME_TIME = 60;
 
     @Override
     public void start(Stage primaryStage) {
@@ -60,14 +63,16 @@ public class CannonUI extends Application {
                     getYFromPerCent(nextY)));
         }
 
-        scoreText.setLayoutX(WIDTH - 100);
+        progressBar.setLayoutX(WIDTH - 120);
+        progressBar.setLayoutY(HEIGHT - 150);
+        scoreText.setLayoutX(WIDTH - 120);
         scoreText.setLayoutY(HEIGHT - 100);
 
         pane.getChildren().addAll(mountains);
-        pane.getChildren().add(scoreText);
+        pane.getChildren().addAll(scoreText, progressBar);
 
         var endGameButton = new Button("End game.");
-        endGameButton.setLayoutX(WIDTH - 100);
+        endGameButton.setLayoutX(WIDTH - 120);
         endGameButton.setLayoutY(HEIGHT - 50);
         pane.getChildren().add(endGameButton);
         endGameButton.setOnAction(event -> endGame());
@@ -84,6 +89,21 @@ public class CannonUI extends Application {
     }
 
     private void startGame() {
+        progressBar.setProgress(1);
+        timerThread = new Thread(() -> {
+            int timeLeft = GAME_TIME;
+            while (timeLeft > 0) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                timeLeft--;
+                progressBar.setProgress(timeLeft / (double) GAME_TIME);
+            }
+            Platform.runLater(this::endGame);
+        });
+        timerThread.start();
         score = 0;
         setScoreText();
         tank = new Tank(0, 0, TANK_WIDTH, TANK_HEIGHT);
@@ -94,6 +114,9 @@ public class CannonUI extends Application {
     }
 
     private void endGame() {
+        if (progressBar.getProgress() > 0) {
+            timerThread.interrupt();
+        }
         pane.getChildren().removeAll(tank, tank.barrel);
         var result = new Label("Your score: " + score);
         var layout = new FlowPane();
@@ -135,7 +158,7 @@ public class CannonUI extends Application {
     }
 
     private class Tank extends Rectangle implements EventHandler<KeyEvent> {
-        private Barrel barrel;
+        private final Barrel barrel;
 
         private Tank(double x, double y, double width, double height) {
             super(x, y, width, height);
