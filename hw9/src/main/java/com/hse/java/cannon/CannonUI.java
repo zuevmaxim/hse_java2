@@ -16,6 +16,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
@@ -35,6 +36,7 @@ public class CannonUI extends Application {
     private final Label scoreText = new Label();
     private Tank tank;
     private final ProgressBar progressBar = new ProgressBar(1);
+    private final Font font = new Font(20);
 
     private static final double HEIGHT = 600;
     private static final double WIDTH = 600;
@@ -63,16 +65,18 @@ public class CannonUI extends Application {
                     getYFromPerCent(nextY)));
         }
 
-        progressBar.setLayoutX(WIDTH - 120);
+        progressBar.setLayoutX(WIDTH - 150);
         progressBar.setLayoutY(HEIGHT - 150);
-        scoreText.setLayoutX(WIDTH - 120);
+        scoreText.setLayoutX(WIDTH - 150);
         scoreText.setLayoutY(HEIGHT - 100);
+        scoreText.setFont(font);
 
         pane.getChildren().addAll(mountains);
         pane.getChildren().addAll(scoreText, progressBar);
 
         var endGameButton = new Button("End game.");
-        endGameButton.setLayoutX(WIDTH - 120);
+        endGameButton.setFont(font);
+        endGameButton.setLayoutX(WIDTH - 150);
         endGameButton.setLayoutY(HEIGHT - 50);
         pane.getChildren().add(endGameButton);
         endGameButton.setOnAction(event -> endGame());
@@ -119,7 +123,11 @@ public class CannonUI extends Application {
             timerThread.interrupt();
         }
         pane.getChildren().removeAll(tank, tank.barrel);
+        var gameOverLabel = new Label("GAME OVER");
+        gameOverLabel.setFont(new Font(35));
+        gameOverLabel.setTextFill(Color.RED);
         var result = new Label("Your score: " + score);
+        result.setFont(new Font(30));
         var layout = new FlowPane();
         layout.setOrientation(Orientation.VERTICAL);
         layout.setVgap(8);
@@ -127,20 +135,24 @@ public class CannonUI extends Application {
         layout.setPadding(new Insets(15,15,15,15));
 
 
-        var scene = new Scene(layout, 200, 300);
+        var scene = new Scene(layout, 300, 300);
         var newWindow = new Stage();
         newWindow.setTitle("Game over");
         newWindow.setScene(scene);
 
         var newGameButton = new Button("Start game");
+        newGameButton.setFont(font);
+        newGameButton.setFocusTraversable(false);
         newGameButton.setOnAction(event -> {
             newWindow.close();
             startGame();
         });
 
         var exitButton = new Button("Exit");
+        exitButton.setFont(font);
+        exitButton.setFocusTraversable(false);
         exitButton.setOnAction(event -> Platform.exit());
-        layout.getChildren().addAll(result, newGameButton, exitButton);
+        layout.getChildren().addAll(gameOverLabel, result, newGameButton, exitButton);
         newWindow.show();
     }
 
