@@ -18,4 +18,5 @@ env:
 
 script:
   - cd $MVN_PROJECT_DIR && mvn install
+  - cd ..
   - cd $GRADLE_PROJECT_DIR && ./gradlew build
