@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveTask;
 
 public class MD5 {
     private static final int SIZE = 4096;
@@ -25,6 +28,45 @@ public class MD5 {
             md.update(hashOneThread(child));
         }
         return md.digest();
+    }
+
+    @NotNull
+    public static byte[] hashForkJoin(@NotNull File file) {
+        return ForkJoinPool.commonPool().invoke(new HashTask(file));
+    }
+
+    private static class HashTask extends RecursiveTask<byte[]> {
+        private File file;
+
+        private HashTask(@NotNull File file) {
+            this.file = file;
+        }
+
+        @Override
+        protected byte[] compute() {
+            MessageDigest md;
+            try {
+                md = MessageDigest.getInstance("MD5");
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+            if (file.isFile()) {
+                return hashFile(file);
+            }
+            md.digest(file.getName().getBytes());
+            var children = file.listFiles();
+            assert children != null; //file is a directory
+            var tasks = new ArrayList<HashTask>();
+            for (var child : children) {
+                var task = new HashTask(child);
+                task.fork();
+                tasks.add(task);
+            }
+            for (var task : tasks) {
+                task.join();
+            }
+            return md.digest();
+        }
     }
 
     @NotNull

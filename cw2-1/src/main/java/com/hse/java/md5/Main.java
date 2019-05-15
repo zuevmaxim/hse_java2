@@ -3,7 +3,6 @@ package com.hse.java.md5;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
@@ -25,19 +24,24 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            var directory = Files.createTempDirectory("temp").toFile();
-            for (int i = 0; i < N; ++i) {
-                var file = Files.createTempFile(directory.toPath(), "tmp", ".tmp").toFile();
-                fillRandomBytes(file);
+            if (args.length == 0) {
+                System.out.println("Enter directory path.");
+                return;
             }
+            var file = new File(args[0]);
 
-            var hash = MD5.hashOneThread(directory);
-            for (var b : hash) {
-                System.out.print(b);
-                System.out.print(" ");
-            }
-        } catch (NoSuchAlgorithmException | IOException e) {
-            e.printStackTrace();
+            var timeOneThread = System.currentTimeMillis();
+             MD5.hashOneThread(file);
+            timeOneThread = System.currentTimeMillis() - timeOneThread;
+            System.out.println("One thread time: " + timeOneThread);
+
+            var timeForkJoin = System.currentTimeMillis();
+            MD5.hashForkJoin(file);
+            timeForkJoin = System.currentTimeMillis() - timeForkJoin;
+            System.out.println("ForkJoin time: " + timeForkJoin);
+
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("No algorithm MD5 found");
         }
     }
 }
