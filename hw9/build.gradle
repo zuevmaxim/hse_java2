@@ -4,10 +4,11 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.0.7'
 }
 
+mainClassName = 'com.hse.java.cannon.CannonUI'
+
 javafx {
     version = "11.0.2"
     modules = [ 'javafx.controls' ]
-    mainClassName = 'com.hse.java.cannon.CannonUI'
 }
 
 group 'com.hse.java'
