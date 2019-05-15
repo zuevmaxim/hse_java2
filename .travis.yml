@@ -15,4 +15,6 @@ env:
   - PROJECT_DIR=hw6
   - PROJECT_DIR=hw7
 
-script: cd $PROJECT_DIR && mvn install
+script:
+  - cd $PROJECT_DIR && mvn install
+  - cd hw9 && ./gradlew build
