@@ -195,7 +195,7 @@ public class CannonUI extends Application {
                 case DOWN:
                     cannon.moveBarrel(-BARREL_STEP_SIZE);
                     break;
-                case SPACE:
+                case ENTER:
                     final int size = bombSize;
                     final var f = cannon.fire(
                             size,

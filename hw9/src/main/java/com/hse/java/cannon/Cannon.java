@@ -10,11 +10,17 @@ public class Cannon {
     private static final Random RANDOM = new Random();
     private static final double GRAVITY = 9.8;
 
+    private static final int TARGET_SCREEN_BOUND = 5;
+    private static final double TARGET_PREVIOUS_OFFSET = 5;
+
     public Cannon(double x) {
         this(x, 0);
     }
 
-    public Cannon(double x, double barrelAngle) {
+    private Cannon(double x, double barrelAngle) {
+        if (x < 0 || x > 100) {
+            throw new IllegalArgumentException("X should be in [0, 100]");
+        }
         state = new CannonState(x, Landscape.getY(x), Landscape.getAngle(x), barrelAngle);
     }
 
@@ -60,11 +66,11 @@ public class Cannon {
 
     public Point getNewTarget() {
         isTargetArchived = false;
-        double x = RANDOM.nextInt(90) + 5;
+        double x = RANDOM.nextInt(100 - 2 * TARGET_SCREEN_BOUND) + TARGET_SCREEN_BOUND;
         if (target != null) {
             double previousX = target.getX();
-            while (Math.abs(x - previousX) < 5) {
-                x = RANDOM.nextInt(90) + 5;
+            while (Math.abs(x - previousX) < TARGET_PREVIOUS_OFFSET) {
+                x = RANDOM.nextInt(100 - 2 * TARGET_SCREEN_BOUND) + TARGET_SCREEN_BOUND;
             }
         }
         target = new Point(x, Landscape.getY(x));
@@ -75,7 +81,7 @@ public class Cannon {
         return state;
     }
 
-    static class CannonState {
+    public static class CannonState {
         private CannonState(double x, double y, double angle, double barrelAngle) {
             this.x = x;
             this.y = y;
