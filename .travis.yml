@@ -7,13 +7,6 @@ jdk:
   - oraclejdk11
 
 env:
-  - MVN_PROJECT_DIR=cw2
-  - MVN_PROJECT_DIR=hw1
-  - MVN_PROJECT_DIR=hw2
-  - MVN_PROJECT_DIR=hw3
-  - MVN_PROJECT_DIR=hw5
-  - MVN_PROJECT_DIR=hw6
-  - MVN_PROJECT_DIR=hw7
   - GRADLE_PROJECT_DIR=hw9
 
 script:
