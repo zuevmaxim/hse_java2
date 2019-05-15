@@ -53,10 +53,16 @@ class MD5Test {
     @BeforeAll
     static void initTempFiles() throws IOException {
         directories.add(Files.createTempDirectory("empty_dir_test").toFile());
+
         directories.add(Files.createTempFile("test_file", ".tmp").toFile());
-        var directory = Files.createTempDirectory("test_dir").toFile();
-        fillDirectory(directory, 5);
-        directories.add(directory);
+
+        var smallDirectory = Files.createTempDirectory("test_dir").toFile();
+        fillDirectory(smallDirectory, 5);
+        directories.add(smallDirectory);
+
+        var bigDirectory = Files.createTempDirectory("test_dir").toFile();
+        fillDirectory(bigDirectory, 5);
+        directories.add(bigDirectory);
     }
 
     @Test
