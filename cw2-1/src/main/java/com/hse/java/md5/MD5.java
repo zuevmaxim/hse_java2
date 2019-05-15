@@ -65,7 +65,7 @@ public class MD5 {
                 }
             }
             for (var task : tasks) {
-                task.join();
+                md.update(task.join());
             }
             return md.digest();
         }
