@@ -7,14 +7,15 @@ jdk:
   - oraclejdk11
 
 env:
-  - PROJECT_DIR=cw2
-  - PROJECT_DIR=hw1
-  - PROJECT_DIR=hw2
-  - PROJECT_DIR=hw3
-  - PROJECT_DIR=hw5
-  - PROJECT_DIR=hw6
-  - PROJECT_DIR=hw7
+  - MVN_PROJECT_DIR=cw2
+  - MVN_PROJECT_DIR=hw1
+  - MVN_PROJECT_DIR=hw2
+  - MVN_PROJECT_DIR=hw3
+  - MVN_PROJECT_DIR=hw5
+  - MVN_PROJECT_DIR=hw6
+  - MVN_PROJECT_DIR=hw7
+  - GRADLE_PROJECT_DIR=hw9
 
 script:
-  - cd $PROJECT_DIR && mvn install
-  - cd hw9 && ./gradlew build
+  - cd $MVN_PROJECT_DIR && mvn install && cd ..
+  - cd $GRADLE_PROJECT_DIR && ./gradlew build && cd ..
