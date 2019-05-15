@@ -10,4 +10,4 @@ env:
   - GRADLE_PROJECT_DIR=hw9
 
 script:
-  - cd $GRADLE_PROJECT_DIR && ./gradlew build
+  - cd $GRADLE_PROJECT_DIR && ./gradlew test
