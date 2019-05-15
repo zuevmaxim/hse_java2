@@ -3,8 +3,13 @@ package com.hse.java.md5;
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
 
-public class Main {
 
+/** Application for find best way to evaluate hash of a file using com.hse.java.md5.MD5. */
+public class Main {
+    /**
+     * Main function.
+     * @param args args[0] should contain a file path
+     */
     public static void main(String[] args) {
         try {
             if (args.length == 0) {
