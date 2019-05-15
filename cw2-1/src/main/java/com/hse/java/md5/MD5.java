@@ -23,9 +23,10 @@ public class MD5 {
         }
         md.digest(file.getName().getBytes());
         var children = file.listFiles();
-        assert children != null; //file is a directory
-        for (var child : children) {
-            md.update(hashOneThread(child));
+        if (children != null) {
+            for (var child : children) {
+                md.update(hashOneThread(child));
+            }
         }
         return md.digest();
     }
@@ -55,12 +56,13 @@ public class MD5 {
             }
             md.digest(file.getName().getBytes());
             var children = file.listFiles();
-            assert children != null; //file is a directory
             var tasks = new ArrayList<HashTask>();
-            for (var child : children) {
-                var task = new HashTask(child);
-                task.fork();
-                tasks.add(task);
+            if (children != null) {
+                for (var child : children) {
+                    var task = new HashTask(child);
+                    task.fork();
+                    tasks.add(task);
+                }
             }
             for (var task : tasks) {
                 task.join();
