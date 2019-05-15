@@ -17,5 +17,5 @@ env:
   - GRADLE_PROJECT_DIR=hw9
 
 script:
-  - cd $MVN_PROJECT_DIR && mvn install && cd ..
-  - cd $GRADLE_PROJECT_DIR && ./gradlew build && cd ..
+  - cd $MVN_PROJECT_DIR && mvn install
+  - cd $GRADLE_PROJECT_DIR && ./gradlew build
