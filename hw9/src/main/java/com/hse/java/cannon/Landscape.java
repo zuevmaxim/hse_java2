@@ -1,6 +1,8 @@
 package com.hse.java.cannon;
 
+/** Fixed landscape. */
 public class Landscape {
+    /** Calculate y = f(x). */
     public static double getY(double x) {
         assert 0 <= x && x <= 100;
         if (x < 10) {
@@ -26,6 +28,7 @@ public class Landscape {
         }
     }
 
+    /** Calculate angle = atan(f'(x)) */
     public static double getAngle(double x) {
         assert 0 <= x && x <= 100;
         double k;

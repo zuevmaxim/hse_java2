@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.geom.Point2D;
 
+/** 2D point. */
 public class Point extends Point2D {
     private double x;
     private double y;
@@ -34,6 +35,7 @@ public class Point extends Point2D {
         this.y = y;
     }
 
+    /** Calculate distance between two points. */
     public static double distance(@NotNull Point first, @NotNull Point second) {
         return Math.sqrt(MyMath.sqr(first.x - second.x) + MyMath.sqr(first.y - second.y));
     }

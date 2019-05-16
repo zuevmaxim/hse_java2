@@ -23,32 +23,81 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Graphics for cannon game.
+ * Buttons:
+ * Left/Right -- tank movement
+ * Up/Down -- barrel movement.
+ * Enter -- fire
+ */
 public class CannonUI extends Application {
+    /** Flag if target has been archived. */
     private final AtomicBoolean isTargetArchived = new AtomicBoolean(false);
+
+    /** Bomb size in [1-9]. */
     private int bombSize = 5;
+
+    /** Current game score. */
     private int score = 0;
+
+    /** Thread calculating time. */
     private Thread timerThread;
 
+    /** Cannon for the game. */
     private final Cannon cannon = new Cannon(55);
+
+    /** Screen pane. */
     private final Pane pane = new Pane();
+
+    /** Game scene. */
     private final Scene scene = new Scene(pane, WIDTH, HEIGHT);
+
+    /** Target image. */
     private Circle target;
+
+    /** Score label. */
     private final Label scoreText = new Label();
+
+    /** Tank state. */
     private Tank tank;
+
+    /** Progress bar image. */
     private final ProgressBar progressBar = new ProgressBar(1);
+
+    /** Game font. */
     private final Font font = new Font(20);
 
+    /** Screen height. */
     private static final double HEIGHT = 600;
+
+    /** Screen width. */
     private static final double WIDTH = 600;
+
+    /** Tank move step size. */
     private static final double STEP_SIZE = 1.0;
+
+    /** Tank height (pixels). */
     private static final double TANK_HEIGHT = 10;
+
+    /** Tank width (pixels). */
     private static final double TANK_WIDTH = 30;
+
+    /** Target size (pixels). */
     private static final double TARGET_SIZE = 5;
+
+    /** Barrel move angle step. */
     private static final double BARREL_STEP_SIZE = 2.0;
+
+    /** Barrel height (pixels). */
     private static final double BARREL_HEIGHT = 3;
+
+    /** Barrel width (pixels). */
     private static final double BARREL_WIDTH = 25;
+
+    /** Game time (seconds). */
     private static final int GAME_TIME = 60;
 
+    /** Start game. */
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setScene(scene);
@@ -88,10 +137,12 @@ public class CannonUI extends Application {
         primaryStage.show();
     }
 
+    /** Set current score. */
     private void setScoreText() {
         scoreText.setText("Score: " + score);
     }
 
+    /** New game initialisation. */
     private void startGame() {
         progressBar.setProgress(1);
         timerThread = new Thread(() -> {
@@ -118,6 +169,7 @@ public class CannonUI extends Application {
         makeTarget();
     }
 
+    /** End game, clear screen, show menu. */
     private void endGame() {
         if (progressBar.getProgress() > 0) {
             timerThread.interrupt();
@@ -156,6 +208,7 @@ public class CannonUI extends Application {
         newWindow.show();
     }
 
+    /** Show new target. */
     private void makeTarget() {
         if (target != null) {
             pane.getChildren().remove(target);
@@ -170,15 +223,21 @@ public class CannonUI extends Application {
         pane.getChildren().add(target);
     }
 
+    /** Tank state class. */
     private class Tank extends Rectangle implements EventHandler<KeyEvent> {
+        /** Tank's barrel */
         private final Barrel barrel;
 
+        /** Constructor. */
         private Tank(double x, double y, double width, double height) {
             super(x, y, width, height);
             setFill(Color.valueOf("#808000"));
             barrel = new Barrel(x, y, BARREL_WIDTH, BARREL_HEIGHT);
         }
 
+        /**
+         * Key event handler.
+         */
         @Override
         public void handle(KeyEvent event) {
             double k = Math.max(1, Math.abs(cannon.getState().getAngle()) / 10);
@@ -260,10 +319,10 @@ public class CannonUI extends Application {
             set(cannon.getState());
         }
 
-        private final double betta = Math.toDegrees(Math.atan(TANK_HEIGHT / (TANK_WIDTH / 2)));
-
+        /** Set current tank and barrel position. */
         private void set(Cannon.CannonState state) {
             double alpha = state.getAngle();
+            double betta = Math.toDegrees(Math.atan(TANK_HEIGHT / (TANK_WIDTH / 2)));
             double gamma = alpha - betta;
             double d = Math.sqrt(MyMath.sqr(TANK_HEIGHT) + MyMath.sqr(TANK_WIDTH / 2));
             setX(getXFromPerCent(state.getX()) - d * Math.cos(Math.toRadians(gamma)));
@@ -281,6 +340,7 @@ public class CannonUI extends Application {
             barrel.getTransforms().add(barrelRotate);
         }
 
+        /** Get coordinates of barrel ending. */
         private Point getBarrelEnding(Cannon.CannonState state) {
             double alpha = state.getAngle() + 90 - state.getBarrelAngle();
             double betta = Math.toDegrees(Math.atan((BARREL_HEIGHT / 2) / BARREL_WIDTH));
@@ -291,6 +351,7 @@ public class CannonUI extends Application {
             return new Point(x, y);
         }
 
+        /** Barrel. */
         private class Barrel extends Rectangle {
             private Barrel(double x, double y, double width, double height) {
                 super(x, y, width, height);
@@ -299,18 +360,22 @@ public class CannonUI extends Application {
         }
     }
 
+    /** Transform x from percents to pixels. */
     private double getXFromPerCent(double x) {
         return x / 100 * WIDTH;
     }
 
+    /** Transform y from percents to pixels. */
     private double getYFromPerCent(double y) {
         return HEIGHT - y / 100 * HEIGHT;
     }
 
+    /** Transform x from pixels to percents. */
     private double getXInPerCent(double x) {
         return x * 100 / WIDTH;
     }
 
+    /** Transform y from pixels to percents. */
     private double getYInPerCent(double y) {
         return (HEIGHT - y) * 100 / HEIGHT;
     }
