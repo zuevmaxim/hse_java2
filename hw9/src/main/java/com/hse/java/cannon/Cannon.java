@@ -43,7 +43,7 @@ public class Cannon {
      * @param x tank abscissa in percent
      * @param barrelAngle initial barrel angle in [-90, 90] (from vertical)
      */
-    private Cannon(double x, double barrelAngle) {
+    private Cannon(double x, @SuppressWarnings("SameParameterValue") double barrelAngle) {
         if (x < 0 || x > 100) {
             throw new IllegalArgumentException("X should be in [0, 100]");
         }

@@ -229,6 +229,7 @@ public class CannonUI extends Application {
         private final Barrel barrel;
 
         /** Constructor. */
+        @SuppressWarnings("SameParameterValue")
         private Tank(double x, double y, double width, double height) {
             super(x, y, width, height);
             setFill(Color.valueOf("#808000"));
@@ -353,6 +354,7 @@ public class CannonUI extends Application {
 
         /** Barrel. */
         private class Barrel extends Rectangle {
+            @SuppressWarnings("SameParameterValue")
             private Barrel(double x, double y, double width, double height) {
                 super(x, y, width, height);
                 setFill(Color.BLACK);
