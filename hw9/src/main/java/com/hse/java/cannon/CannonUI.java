@@ -27,8 +27,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Graphics for cannon game.
  * Buttons:
  * Left/Right -- tank movement
- * Up/Down -- barrel movement.
+ * Up/Down -- barrel movement
  * Enter -- fire
+ * [1-9] -- bomb size
  */
 public class CannonUI extends Application {
     /** Flag if target has been archived. */
