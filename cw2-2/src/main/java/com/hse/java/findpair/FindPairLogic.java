@@ -4,15 +4,36 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+/**
+ * Find pair game logic part.
+ */
 public class FindPairLogic {
+    /** Size of the board. */
     private int size;
+
+    /** Random device. */
     private final Random random = new Random();
+
+    /** Numbers on the board. */
     private final int[][] numbers;
+
+    /** Current state. True iff button was clicked once. */
     private boolean state = false;
+
+    /** X coordinate of the last move. */
     private int previousI = -1;
+
+    /** Y coordinate of the last move. */
     private int previousJ = -1;
+
+    /** Number of closed buttons. Game ends when it equals to zero. */
     private int rest;
 
+    /**
+     * Logic constructor
+     * @param size board size
+     *             Supposed to be even positive integer.
+     */
     public FindPairLogic(int size) {
         this.size = size;
         rest = size * size / 2;
@@ -20,6 +41,9 @@ public class FindPairLogic {
         fillRandom();
     }
 
+    /**
+     * Fill numbers array with random numbers in pairs from 0 to size^2 / 2.
+     */
     private void fillRandom() {
         int pairs = size * size / 2;
         var randoms = new ArrayList<Integer>(2 * pairs);
@@ -39,6 +63,12 @@ public class FindPairLogic {
         }
     }
 
+    /**
+     * Make move method.
+     * @param i x coordinate
+     * @param j y coordinate
+     * @return State of the game after the move.
+     */
     public State getState(int i, int j) {
         if (!state) {
             previousI = i;
@@ -61,18 +91,37 @@ public class FindPairLogic {
     }
 
 
-
+    /** Game state. */
     public class State {
+        /** True iff game should be finished. */
         private boolean endGame;
+
+        /** X coordinate of the last move. */
         private int i;
+
+        /** Y coordinate of the last move. */
         private int j;
+
+        /** Number of the (i, j) button. */
         private int n;
+
+        /** X coordinate of the previous move. */
         private int previousI;
+
+        /** Y coordinate of the previous move. */
         private int previousJ;
+
+        /** Number of the (previousI, previousJ) button. */
         private int previousN;
+
+        /** If result is available. True iff even number of steps was made. */
         private boolean hasResult;
+
+        /** True if the last move opened two equal numbers. */
         private boolean success;
 
+
+        /** State constructor. */
         public State(boolean endGame, int i, int j, int n, int previousI, int previousJ, int previousN, boolean hasResult, boolean success) {
             this.endGame = endGame;
             this.i = i;

@@ -25,14 +25,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Find pair game.
  */
 public class FindPair extends Application {
+    /** Screen width. */
     private static final int WIDTH = 600;
+
+    /** Screen height. */
     private static final int HEIGHT = 600;
+
+    /** Board size. */
     private static int size;
+
+    /** Buttons on the board. */
     private Button[][] buttons;
+
+    /** Logic part of the game. */
     private FindPairLogic logic;
+
+    /** Could user play. Becomes false after wrong move. */
     private AtomicBoolean isGameEnable = new AtomicBoolean(true);
+
+    /** Execution of timer actions. */
     private ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(1);
 
+    /**
+     * Start execution of application.
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
         buttons = new Button[size][size];
@@ -64,6 +80,10 @@ public class FindPair extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Show the reaction on the last move.
+     * @param state state after last move
+     */
     private void dealWithState(FindPairLogic.State state) {
         buttons[state.getI()][state.getJ()].setText(Integer.toString(state.getN()));
         buttons[state.getI()][state.getJ()].setDisable(true);
@@ -84,6 +104,10 @@ public class FindPair extends Application {
         }
     }
 
+    /**
+     * End game method.
+     * Show a window with information.
+     */
     private void endGame() {
         var gameOverLabel = new Label("GAME OVER");
         gameOverLabel.setFont(new Font(35));
@@ -108,6 +132,10 @@ public class FindPair extends Application {
         newWindow.show();
     }
 
+    /**
+     * Game starts from here.
+     * @param args args[0] should be an even positive integer, size of the board
+     */
     public static void main(String[] args) {
         if (args.length != 1) {
             System.out.println("Enter one argument -- size of the board.");
