@@ -11,7 +11,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 
+/** Main class for testing. */
 public class Main {
+    /**
+     * Console application for testing
+     * @param args args[0] -- path to a jar or class file to test.
+     */
     public static void main(String[] args) {
         if (args.length != 1) {
             System.out.println("Illegal number of arguments. Enter only a path to a .class or .jar file.");

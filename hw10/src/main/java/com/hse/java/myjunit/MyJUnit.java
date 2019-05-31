@@ -10,17 +10,43 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Class for testing a Class object methods annotated with @Test.
+ */
 public class MyJUnit {
+    /** Class to test. */
     private Class<?> clazz;
+
+    /** Before methods to invoke. */
     private List<Method> before;
+
+    /** Methods to invoke before all tests. */
     private List<Method> beforeClass;
+
+    /** After methods to invoke. */
     private List<Method> after;
+
+    /** Methods to invoke after all tests. */
     private List<Method> afterClass;
+
+    /** Tests to ignore. */
     private List<Method> ignoredTests;
+
+    /** Test that should pass. */
     private List<Method> testsWithoutException;
+
+    /** Tests throwing exceptions. */
     private List<Method> testsWithException;
     private Object instance;
 
+
+    /**
+     * Constructor prepares for testing.
+     * Class should have default public constructor.
+     * @param clazz class to test
+     * @throws IllegalAccessException if constructor of testing class is private
+     * @throws InstantiationException if testing class has no default constructor
+     */
     public MyJUnit(Class<?> clazz) throws IllegalAccessException, InstantiationException {
         this.clazz = clazz;
         instance = clazz.newInstance();
@@ -42,6 +68,12 @@ public class MyJUnit {
         testsWithException = tests;
     }
 
+    /**
+     * Run tests annotated with @Test.
+     * All the tests and before after methods should not have arguments.
+     * @return list of results of the tests
+     * @throws MyJUnitException if an error occurred while testing
+     */
     public List<TestMethodResult> runTests() throws MyJUnitException {
         invokeBeforeAfterMethods(beforeClass);
 
@@ -80,12 +112,22 @@ public class MyJUnit {
         return result;
     }
 
+    /**
+     * Check that method has no arguments or throw otherwise.
+     * @param method method to check
+     * @throws MyJUnitException if method has nonzero argument number
+     */
     private void checkZeroArguments(Method method) throws MyJUnitException {
         if (method.getParameterTypes().length > 0) {
             throw new MyJUnitException("Methods should not have arguments, but method " + method.getName() + " needs " + method.getParameterTypes().length + " arguments.");
         }
     }
 
+    /**
+     * Invoke methods before or after test.
+     * @param methods methods to invoke
+     * @throws MyJUnitException if an error occurs while running
+     */
     private void invokeBeforeAfterMethods(List<Method> methods) throws MyJUnitException {
         for (var method : methods) {
             method.setAccessible(true);
@@ -101,11 +143,21 @@ public class MyJUnit {
         }
     }
 
+    /** Result of the test. */
     public static class TestMethodResult {
+        /** Test name. */
         private String name;
+
+        /** If test should be ignored. */
         private boolean ignored;
+
+        /** Reason of ignoring. */
         private String reason;
+
+        /** Expected exception. */
         private Class<? extends Throwable> expected;
+
+        /** Result of a runnable test. */
         private RunResult runResult;
 
         public TestMethodResult(String name, boolean ignored, String reason, Class<? extends Throwable> expected, RunResult runResult) {
@@ -137,9 +189,15 @@ public class MyJUnit {
         }
     }
 
+    /** Result of a runnable test. */
     public static class RunResult {
+        /** If test passed. */
         private boolean passed;
+
+        /** Exception thrown while running. */
         private Throwable exception;
+
+        /** Running time of the test. */
         private long time;
 
         public RunResult(boolean passed, Throwable exception, long time) {
@@ -161,6 +219,7 @@ public class MyJUnit {
         }
     }
 
+    /** Test one method. */
     private RunResult testMethod(Method method) {
         try {
             invokeBeforeAfterMethods(before);
@@ -187,6 +246,7 @@ public class MyJUnit {
         }
     }
 
+    /** Test one method that should throw exception. */
     private RunResult testMethod(Method method, Class<? extends Throwable> expected) {
         try {
             invokeBeforeAfterMethods(before);
@@ -216,6 +276,7 @@ public class MyJUnit {
         }
     }
 
+    /** List method annotated with an annotation. */
     private List<Method> getMethodsWithAnnotation(Class<? extends Annotation> annotation) {
         return Arrays.stream(clazz.getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(annotation))
