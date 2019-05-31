@@ -1,6 +1,6 @@
-package com.hse.java.myjunut;
+package com.hse.java.myjunit;
 
-import com.hse.java.myjunut.annotations.*;
+import com.hse.java.myjunit.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;

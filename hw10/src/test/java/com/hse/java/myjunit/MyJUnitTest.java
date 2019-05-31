@@ -1,9 +1,7 @@
-package com.hse.java.myjunut;
+package com.hse.java.myjunit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class MyJUnitTest {
     @BeforeEach

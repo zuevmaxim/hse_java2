@@ -1,4 +1,4 @@
-package com.hse.java.myjunut;
+package com.hse.java.myjunit;
 
 public class MyJUnitException extends Exception {
     public MyJUnitException(String message) {

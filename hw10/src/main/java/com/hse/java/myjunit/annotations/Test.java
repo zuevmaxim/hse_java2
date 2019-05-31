@@ -1,4 +1,4 @@
-package com.hse.java.myjunut.annotations;
+package com.hse.java.myjunit.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,5 +7,9 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface AfterClass {
+public @interface Test {
+    Class<? extends Throwable> expected() default DefaultException.class;
+    String ignore() default "";
+
+    class DefaultException extends Exception { }
 }

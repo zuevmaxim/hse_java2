@@ -1,12 +1,15 @@
-package com.hse.java.myjunut;
+package com.hse.java.myjunit;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 
 public class Main {
     public static void main(String[] args) {
@@ -26,14 +29,12 @@ public class Main {
         }
         var classes = new ArrayList<Class<?>>();
         if (path.endsWith(".class")) {
-
-            String className = file.getName().substring(0, file.getName().indexOf('.'));
+            var className = file.getName().substring(0, file.getName().indexOf('.'));
             try {
-                classes.add(new URLClassLoader(new URL[]{
-                        file
-                            .toURI()
-                            .toURL()
-                }).loadClass(className));
+                var url = file.toPath().getParent().toUri().toURL();
+                var classLoader = new URLClassLoader(new URL[]{url});
+                var clazz = classLoader.loadClass(className);
+                classes.add(clazz);
             } catch (ClassNotFoundException e) {
                 System.out.println("No such class found : " + className + ".");
                 return;
@@ -42,11 +43,26 @@ public class Main {
                 return;
             }
         } else {
+            String className = "";
             try {
-                var jar = new JarFile(path);
+                var url = file.toPath().getParent().toUri().toURL();
+                var classLoader = new URLClassLoader(new URL[]{url});
+                var jar = new JarInputStream(new FileInputStream(file));
+                JarEntry jarEntry;
+                while ((jarEntry = jar.getNextJarEntry()) != null) {
+                    className = jarEntry.getName();
+                    if (className.endsWith(".class")) {
+                        className = className.substring(0, className.lastIndexOf('.'));
+                        className = className.substring(className.lastIndexOf('/') + 1);
+                        classes.add(classLoader.loadClass(className));
+                    }
+                }
 
             } catch (IOException e) {
                 System.out.println("Error occurred while IO operations: " + e.getMessage());
+                return;
+            } catch (ClassNotFoundException e) {
+                System.out.println("No such class found : " + className + ".");
                 return;
             }
         }
@@ -91,6 +107,7 @@ public class Main {
                     }
                 }
                 System.out.printf("\nTest result:\n  total   %d\n  passed  %d\n  failed  %d\n  ignored %d\n", total, passed, failed, ignored);
+                continue;
             } catch (IllegalAccessException | InstantiationException e) {
                 System.out.println("Test class should have public default constructor.");
             } catch (MyJUnitException e) {
