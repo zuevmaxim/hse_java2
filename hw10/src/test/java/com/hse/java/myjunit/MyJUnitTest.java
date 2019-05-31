@@ -68,7 +68,7 @@ class MyJUnitTest {
 
     @Test
     void constructorWithParametersTest() {
-        assertThrows(InstantiationException.class, () -> new MyJUnit(ConstructorWithParamrtersTestClass.class));
+        assertThrows(InstantiationException.class, () -> new MyJUnit(ConstructorWithParametersTestClass.class));
     }
 
     @Test

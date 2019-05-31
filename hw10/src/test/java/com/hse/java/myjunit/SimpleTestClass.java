@@ -3,7 +3,7 @@ package com.hse.java.myjunit;
 import com.hse.java.myjunit.annotations.*;
 
 public class SimpleTestClass {
-    int x;
+    private int x;
 
     @Before
     void init() {

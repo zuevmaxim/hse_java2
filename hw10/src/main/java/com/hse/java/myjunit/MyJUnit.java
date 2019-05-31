@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class MyJUnit {
     /** Class to test. */
-    private Class<?> clazz;
+    private final Class<?> clazz;
 
     /** Before methods to invoke. */
     private List<Method> before;
@@ -146,19 +146,19 @@ public class MyJUnit {
     /** Result of the test. */
     public static class TestMethodResult {
         /** Test name. */
-        private String name;
+        private final String name;
 
         /** If test should be ignored. */
-        private boolean ignored;
+        private final boolean ignored;
 
         /** Reason of ignoring. */
-        private String reason;
+        private final String reason;
 
         /** Expected exception. */
-        private Class<? extends Throwable> expected;
+        private final Class<? extends Throwable> expected;
 
         /** Result of a runnable test. */
-        private RunResult runResult;
+        private final RunResult runResult;
 
         public TestMethodResult(String name, boolean ignored, String reason, Class<? extends Throwable> expected, RunResult runResult) {
             this.name = name;
@@ -192,13 +192,13 @@ public class MyJUnit {
     /** Result of a runnable test. */
     public static class RunResult {
         /** If test passed. */
-        private boolean passed;
+        private final boolean passed;
 
         /** Exception thrown while running. */
-        private Throwable exception;
+        private final Throwable exception;
 
         /** Running time of the test. */
-        private long time;
+        private final long time;
 
         public RunResult(boolean passed, Throwable exception, long time) {
             this.passed = passed;
