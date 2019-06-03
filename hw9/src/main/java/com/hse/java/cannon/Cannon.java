@@ -100,13 +100,12 @@ public class Cannon {
           assert t >= 0;
           double x = x0 + v0 * t * Math.cos(angle);
           double y = y0 + v0 * t * Math.sin(angle) - GRAVITY * t * t / 2;
-          if (x < 0 || x > 100 || y < Landscape.getY(x)) {
-              return null;
-          }
-
           var point = new Point(x, y);
-          if (Point.distance(point, target) < distance) {
-              cannon.isTargetArchived = true;
+          if (x < 0 || x > 100 || y < Landscape.getY(x)) {
+              if (Point.distance(point, target) < distance) {
+                  cannon.isTargetArchived = true;
+              }
+              return null;
           }
           return point;
         };

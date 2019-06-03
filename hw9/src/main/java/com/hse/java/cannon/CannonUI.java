@@ -298,7 +298,7 @@ public class CannonUI extends Application {
                             if (cannon.isTargetArchived() && isTargetArchived.compareAndSet(false, true)) {
                                 score++;
                                 Platform.runLater(CannonUI.this::setScoreText);
-                                for (double i = size; i <= 2.5 * size; i += 0.2) {
+                                for (double i = size; i <= 2 * size + TARGET_SIZE; i += 0.2) {
                                     circle.setRadius(i);
                                     try {
                                         Thread.sleep(50 / size);
