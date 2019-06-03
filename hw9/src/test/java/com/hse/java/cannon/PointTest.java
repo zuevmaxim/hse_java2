@@ -9,7 +9,7 @@ class PointTest {
     @Test
     void setLocation() {
         var point = new Point(0, 0);
-        point.setLocation(1,1);
+        point.setLocation(1, 1);
         assertEquals(1, point.getX());
         assertEquals(1, point.getY());
     }
@@ -23,7 +23,7 @@ class PointTest {
     @Test
     void distancePoints() {
         var point = new Point(3, 4);
-        var zeroPoint = new Point(0,0);
+        var zeroPoint = new Point(0, 0);
         assertEquals(5, Point.distance(point, zeroPoint));
     }
 }

@@ -1,5 +1,7 @@
 package com.hse.java.cannon;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Random;
 import java.util.function.Function;
 
@@ -88,7 +90,7 @@ public class Cannon {
      *
      * The bigger size is the smaller speed bomb has.
      */
-    public Function<Double, Point> fire(int size, double distance, Point barrelEnding) {
+    public Function<Double, Point> fire(int size, double distance, @NotNull Point barrelEnding) {
         final double angle = Math.toRadians(state.angle + 90 - state.barrelAngle);
         final double x0 = barrelEnding.getX();
         final double y0 = barrelEnding.getY();

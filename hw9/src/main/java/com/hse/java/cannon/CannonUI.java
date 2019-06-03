@@ -19,6 +19,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -185,7 +186,7 @@ public class CannonUI extends Application {
         layout.setOrientation(Orientation.VERTICAL);
         layout.setVgap(8);
         layout.setHgap(4);
-        layout.setPadding(new Insets(15,15,15,15));
+        layout.setPadding(new Insets(15, 15, 15, 15));
 
 
         var scene = new Scene(layout, 300, 300);
@@ -322,7 +323,7 @@ public class CannonUI extends Application {
         }
 
         /** Set current tank and barrel position. */
-        private void set(Cannon.CannonState state) {
+        private void set(@NotNull Cannon.CannonState state) {
             double alpha = state.getAngle();
             double betta = Math.toDegrees(Math.atan(TANK_HEIGHT / (TANK_WIDTH / 2)));
             double gamma = alpha - betta;
@@ -343,7 +344,8 @@ public class CannonUI extends Application {
         }
 
         /** Get coordinates of barrel ending. */
-        private Point getBarrelEnding(Cannon.CannonState state) {
+        @NotNull
+        private Point getBarrelEnding(@NotNull Cannon.CannonState state) {
             double alpha = state.getAngle() + 90 - state.getBarrelAngle();
             double betta = Math.toDegrees(Math.atan((BARREL_HEIGHT / 2) / BARREL_WIDTH));
             double gamma = alpha - betta;
