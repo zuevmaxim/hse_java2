@@ -3,9 +3,9 @@ package com.hse.java.myjunit;
 import com.hse.java.myjunit.annotations.BeforeClass;
 import com.hse.java.myjunit.annotations.Test;
 
-public class BeforeThrowsTestClass {
+class BeforeThrowsTestClass {
     @BeforeClass
-    void init() {
+    static void init() {
         throw new AssertionError();
     }
 

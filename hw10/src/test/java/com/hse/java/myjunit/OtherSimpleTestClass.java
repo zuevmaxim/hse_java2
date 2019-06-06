@@ -2,7 +2,7 @@ package com.hse.java.myjunit;
 
 import com.hse.java.myjunit.annotations.*;
 
-class SimpleTestClass {
+class OtherSimpleTestClass {
     private int x;
 
     @BeforeClass
