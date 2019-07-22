@@ -14,5 +14,6 @@ env:
   - PROJECT_DIR=hw5
   - PROJECT_DIR=hw6
   - PROJECT_DIR=hw7
+  - PROJECT_DIR=hw8
 
 script: cd $PROJECT_DIR && mvn install
